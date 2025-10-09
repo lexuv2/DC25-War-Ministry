@@ -1,8 +1,8 @@
 # DC25-War-Ministry
-Projekt na dokumenty cyfrowe
+Projekt na Dokumenty Cyfrowe
 
 
-System wspierający proces rekrutacyjny dla zepołu HR wojny
+System wspierający proces rekrutacyjny dla zespołu HR Ministerstwa Wojny.
 Aplikacja automatycznie przetwarza CV przesyłane w formatach PDF i ODT, klasyfikuje kandydatów względem stanowisk, weryfikuje wymagania oraz generuje odpowiednie pisma (odrzucenia/zaproszenia). Dokumenty są archiwizowane w chmurze, a zespół HR ma dostęp do prostego panelu webowego.
 
 ## Funkcjonalności
@@ -13,19 +13,19 @@ Aplikacja automatycznie przetwarza CV przesyłane w formatach PDF i ODT, klasyfi
 - Generowanie rankingu kandydatów  
 - Wysyłanie maili (odrzucenie / zaproszenie)  
 - Zapisywanie dokumentów w wybranej chmurze
-- Prosty panel HR + API (Swagger UI)  
+- Prosty panel HR + API
 
 ## Technologie
 - Backend: Java
-- Frontend: TODO
+- Frontend: TypeScript & Angular
 - Parser: Python  
 
 
 ## Pozycje otwarte w wojnie
 ### Operator wajchy
- - wymagane wykrzształcenie wyższe
- - nie moża zadawać za dużo pytań
- - 10 lat doświadcczenia w obsłudze urządzeń mechaniccznych
+ - wymagane wykształcenie wyższe
+ - nie może zadawać za dużo pytań
+ - 10 lat doświadcczenia w obsłudze urządzeń mechanicznych
  - wysokie umiejętności miękkie
 
 ### Żołnież piechoty zmechanizowanej
