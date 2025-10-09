@@ -19,3 +19,17 @@ Aplikacja automatycznie przetwarza CV przesyłane w formatach PDF i ODT, klasyfi
 - Backend: Java
 - Frontend: TODO
 - Parser: Python  
+
+
+## Pozycje otwarte w wojnie
+### Operator wajchy
+ - wymagane wykrzształcenie wyższe
+ - nie moża zadawać za dużo pytań
+ - 10 lat doświadcczenia w obsłudze urządzeń mechaniccznych
+ - wysokie umiejętności miękkie
+
+### Żołnież piechoty zmechanizowanej
+ - powinien umieć czytać
+ - znajomość stron świata
+ - szybko biega
+   
