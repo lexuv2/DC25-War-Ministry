@@ -1,0 +1,10 @@
+black==25.9.0
+click==8.3.0
+mypy==1.18.2
+mypy_extensions==1.1.0
+packaging==25.0
+pathspec==0.12.1
+platformdirs==4.5.0
+PyMuPDF==1.26.5
+pytokens==0.1.10
+typing_extensions==4.15.0
