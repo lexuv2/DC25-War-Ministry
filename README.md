@@ -26,13 +26,14 @@ Aplikacja automatycznie przetwarza CV przesyłane w formatach PDF i ODT, klasyfi
 | Wymagane | Opcjonalne |
 |----------|------------|
 | wykształcenie wyższe | wysokie umiejętności miękkie |
-| 10 lat doświadczenia w obsłudze urządzeń mechanicznych |  |
-| niezadawanie pytań |  |
+| 10 lat doświadczenia w obsłudze urządzeń mechanicznych | 150 kg w martwym ciągu |
+| niezadawanie pytań | uprawnienia na wózek widłowy |
+| znajomość nazw kolorów | stawianie tarota |
 
 ### Żołnierz piechoty zmechanizowanej
 | Wymagane | Opcjonalne |
 |----------|------------|
-| znajomość stron świata | umiejętność czytania |
-| szybkie bieganie | |
-
-   
+| znajomość stron świata | prawo jazdy |
+| szybkie bieganie | umiejętność czytania |
+| umiejętność robienia pompek | niekaralność |
+|  | znajomość tabliczki mnożenia |
