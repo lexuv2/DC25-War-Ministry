@@ -28,7 +28,7 @@ Aplikacja automatycznie przetwarza CV przesyłane w formatach PDF i ODT, klasyfi
  - 10 lat doświadcczenia w obsłudze urządzeń mechanicznych
  - wysokie umiejętności miękkie
 
-### Żołnież piechoty zmechanizowanej
+### Żołnierz piechoty zmechanizowanej
  - powinien umieć czytać
  - znajomość stron świata
  - szybko biega

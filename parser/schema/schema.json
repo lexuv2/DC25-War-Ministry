@@ -1,0 +1,99 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "CV Parser Schema for War Ministry",
+  "type": "object",
+  "properties": {
+    "personal_info": {
+      "type": "object",
+      "properties": {
+        "full_name": { "type": "string" },
+        "date_of_birth": { "type": "string", "format": "date" },
+        "nationality": { "type": "string" },
+        "contact": {
+          "type": "object",
+          "properties": {
+            "email": { "type": "string", "format": "email" },
+            "phone": { "type": "string" },
+            "address": { "type": "string" }
+          },
+          "required": ["email", "phone"]
+        }
+        },
+        "required": ["full_name", "date_of_birth", "nationality", "contact"]
+    },
+    "education": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "degree": { "type": "string" },
+          "institution": { "type": "string" },
+          "start_date": { "type": "string", "format": "date" },
+          "end_date": { "type": ["string", "null"], "format": "date" },
+          "field_of_study": { "type": "string" }
+        },
+        "required": ["degree", "institution", "start_date", "field_of_study"]
+      }
+    },
+    "work_experience": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "job_title": { "type": "string" },
+          "company": { "type": "string" },
+          "start_date": { "type": "string", "format": "date" },
+          "end_date": { "type": ["string", "null"], "format": "date" }
+        },
+        "required": ["job_title", "company", "start_date"]
+      }
+    },
+    "skills": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "certifications": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "issuing_organization": { "type": "string" }
+        },
+        "required": ["name", "issuing_organization"]
+      }
+    },
+    "languages": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "language": { "type": "string" },
+          "proficiency": { 
+            "type": "string",
+            "enum": ["basic", "conversational", "fluent", "native"]
+          }
+        },
+        "required": ["language", "proficiency"]
+      }
+    },
+    "military_experience": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "rank": { "type": "string" },
+          "branch": { "type": "string" },
+          "start_date": { "type": "string", "format": "date" },
+          "end_date": { "type": ["string", "null"], "format": "date" },
+          "duties": { 
+            "type": "array",
+            "items": { "type": "string" }
+          }
+        },
+        "required": ["rank", "branch", "start_date", "duties"]
+      }
+    }
+    },
+    "required": ["personal_info", "education", "work_experience", "skills", "languages"]
+}
