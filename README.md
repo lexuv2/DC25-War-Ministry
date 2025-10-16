@@ -23,13 +23,16 @@ Aplikacja automatycznie przetwarza CV przesyłane w formatach PDF i ODT, klasyfi
 
 ## Pozycje otwarte w wojnie
 ### Operator wajchy
- - wymagane wykształcenie wyższe
- - nie może zadawać za dużo pytań
- - 10 lat doświadcczenia w obsłudze urządzeń mechanicznych
- - wysokie umiejętności miękkie
+| Wymagane | Opcjonalne |
+|----------|------------|
+| wykształcenie wyższe | wysokie umiejętności miękkie |
+| 10 lat doświadczenia w obsłudze urządzeń mechanicznych |  |
+| niezadawanie pytań |  |
 
 ### Żołnierz piechoty zmechanizowanej
- - powinien umieć czytać
- - znajomość stron świata
- - szybko biega
+| Wymagane | Opcjonalne |
+|----------|------------|
+| znajomość stron świata | umiejętność czytania |
+| szybkie bieganie | |
+
    
