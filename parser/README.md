@@ -4,8 +4,12 @@
 `python setup.py`  
 Po skrypcie włącz venv  
 `source venv/bin/activate` lub `venv\\Scripts\\activate`
+
 ### Uruchamianie
 `python __main__.py`
+
+### Testowanie
+`pytest`
 
 ### Autoformatowanie i sprawdzanie błędów
 Automatycznie formatuje kod więc nie trzeba się o to kłócić :)    
