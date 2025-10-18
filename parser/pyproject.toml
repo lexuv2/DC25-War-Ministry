@@ -1,0 +1,10 @@
+[tool.mypy]
+strict = true
+ignore_missing_imports = true
+exclude = ["test", "conftest.py"]
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = "-ra -q -v"
+testpaths = ["test/pydantic"]
+pythonpath = "."
