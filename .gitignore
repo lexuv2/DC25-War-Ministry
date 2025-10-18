@@ -1,3 +1,6 @@
 # Parser
+parser/**/__pycache__
 parser/venv
+parser/logs
 parser/.mypy_cache
+parser/.pytest_cache
