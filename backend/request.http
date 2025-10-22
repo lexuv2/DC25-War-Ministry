@@ -1,0 +1,12 @@
+### Get Labels
+
+GET http://localhost:8080/gmail/labels
+
+### Get mail count
+
+GET http://localhost:8080/gmail/inbox/count
+
+### Get Labels
+
+GET http://localhost:8080/gmail/inbox/1
+
