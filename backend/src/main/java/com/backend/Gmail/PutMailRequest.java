@@ -1,4 +1,4 @@
-package com.backend.mail.dto;
+package com.backend.Gmail;
 
 import jakarta.validation.constraints.NotBlank;
 
@@ -6,6 +6,7 @@ public record PutMailRequest(
         @NotBlank String emailAddress,
         @NotBlank boolean wasAccepted,
         String Reason,
-        String MeetingDetails
+        String meetingDetails,
+        String position
 ) {
 }

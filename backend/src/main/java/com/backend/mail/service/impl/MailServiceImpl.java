@@ -2,7 +2,7 @@ package com.backend.mail.service.impl;
 
 
 import com.backend.mail.repository.api.MailRepository;
-import com.backend.mail.dto.PutMailRequest;
+import com.backend.Gmail.PutMailRequest;
 import com.backend.mail.entity.Mail;
 import com.backend.mail.function.RequestToMailFunction;
 import com.backend.mail.service.api.MailService;

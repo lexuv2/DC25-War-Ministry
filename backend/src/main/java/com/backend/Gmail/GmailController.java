@@ -4,10 +4,9 @@ import com.backend.shared.EndpointConstants;
 import com.google.api.services.gmail.Gmail;
 import com.google.api.services.gmail.model.ListLabelsResponse;
 import com. google. api. services. gmail. model. Label;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
@@ -25,9 +24,9 @@ public class GmailController {
     @GetMapping("/labels")
     public List<String> listLabels() throws Exception {
         Gmail gmail = gmailService.getService();
-        System.out.println("1");
+        //System.out.println("1");
         ListLabelsResponse listResponse = gmail.users().labels().list("me").execute();
-        System.out.println("2");
+        //System.out.println("2");
         return listResponse.getLabels().stream()
                 .map(Label::getName)
                 .toList();
@@ -41,5 +40,15 @@ public class GmailController {
     @GetMapping("/inbox/{index}")
     public Map<String, String> getNthNewestMail(@PathVariable int index) throws Exception {
         return gmailService.getNthNewestMail(index);
+    }
+
+    @PutMapping("/send")
+    public ResponseEntity<String> sendMail(@RequestBody PutMailRequest request) throws Exception {
+        boolean success = gmailService.sendMail(request);
+        if (success) {
+            return ResponseEntity.ok("Email sent successfully.");
+        } else {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Failed to send email.");
+        }
     }
 }
