@@ -6,7 +6,12 @@ Po skrypcie włącz venv
 `source venv/bin/activate` lub `venv\\Scripts\\activate`
 
 ### Uruchamianie
-`python __main__.py`
+  
+`python __main__.py --input [.pdf] --output [.json]`  
+
+Opcja mock  
+`python __main__.py --api-mock --output [.json]`  
+
 
 ### Testowanie
 `pytest`
