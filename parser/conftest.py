@@ -4,6 +4,7 @@ import logging
 
 BASE_LOG_DIR = "logs"
 
+
 @pytest.fixture(autouse=True)
 def capture_test_logs(request, capsys):
     test_dir = os.path.basename(os.path.dirname(request.fspath))
