@@ -16,84 +16,139 @@ import argparse
 from src import schema
 import json
 from datetime import date
+from typing import Optional, Any, List
+import re
+import unicodedata
+
+
+def normalize_whitespace(text: str) -> str:
+    """
+    Strip leading and trailing whitespace from the text,
+    and replace sequences of spaces or tabs with a single space.
+    """
+    text = re.sub(r"[ \t]+", " ", text)
+    text = "\n".join(line.strip() for line in text.splitlines())
+    return text.strip()
+
+
+def remove_unwanted_unicode(text: str) -> str:
+    """
+    Keep only ASCII, common Latin letters with diacritics,
+    and punctuation/symbols useful in text.
+    Removes control characters and emoji-like symbols.
+    """
+    cleaned = []
+    for ch in text:
+        # Remove control characters
+        if ord(ch) < 32 and ch not in ("\n", "\t"):
+            continue
+        # Allow ASCII
+        if ord(ch) < 128:
+            cleaned.append(ch)
+            continue
+        # Allow Latin letters with accents (e.g., Polish, Czech, etc.)
+        cat = unicodedata.name(ch, "")
+        if "LATIN" in cat or "WITH" in cat:
+            cleaned.append(ch)
+            continue
+        # Allow common punctuation/symbols like bullets, dashes, ©, etc.
+        if ch in "•–—…«»©®°":
+            cleaned.append(ch)
+            continue
+        # Otherwise skip (emoji, CJK, etc.)
+    return "".join(cleaned)
+
+
+def create_mock() -> schema.CVParserSchema:
+
+    contact = schema.Contact(
+        email="undefined@undefined.com",
+        phone="+48 123458021",
+        address="UNDEFINED",
+    )
+
+    personal_info = schema.PersonalInfo(
+        full_name="UNDEFINED",
+        date_of_birth=date(1901, 1, 1),
+        nationality="UNDEFINED",
+        contact=contact,
+    )
+
+    return schema.CVParserSchema(
+        personal_info=personal_info,
+        education=[],
+        work_experience=[],
+        skills=[],
+        certifications=[],
+        languages=[],
+        military_experience=[],
+    )
+
+
+def extract_email(text: str) -> Optional[str]:
+    email_pattern = re.compile(r"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}")
+
+    emails = email_pattern.findall(text)
+    occurences = list(set(emails))
+
+    if len(occurences) > 0:
+        return str(occurences[0])
+
+    return None
+
+
+def extract_phone(text: str) -> Optional[str]:
+    phone_pattern = re.compile(
+        r"(?:(?:\+\d{1,3}\s*)?(?:\(?\d{2,4}\)?[\s.-]*)?\d{3}[\s.-]*\d{3,4}[\s.-]*\d{3,4})"
+    )
+    phones = phone_pattern.findall(text)
+    occurences = list(set(phones))
+
+    if len(occurences) > 0:
+        return str(occurences[0])
+
+    return None
+
+
+def apply_extractors(cv: Any, text: str, extractors: list[tuple[Any, str]]) -> None:
+    """
+    Runs a list of (extractor_function, attribute_path) tuples
+    and assigns results to attributes on the cv object.
+    """
+    for extractor_fn, attr_path in extractors:
+        value = extractor_fn(text)
+        if not value:
+            continue
+        # navigate nested attributes using dotted path, e.g. "personal_info.contact.email"
+        parts = attr_path.split(".")
+        target = cv
+        for part in parts[:-1]:
+            target = getattr(target, part)
+        setattr(target, parts[-1], value)
 
 
 def parse_file(input: str, output: str) -> None:
     doc = fitz.open(input)
-    with open(output, "w", encoding="utf-8") as f:
+    cv = create_mock()
+
+    extractors = [
+        (extract_email, "personal_info.contact.email"),
+        (extract_phone, "personal_info.contact.phone"),
+    ]
+
+    with open(f"{output}.txt", "w", encoding="utf-8") as f:
         for i, page in enumerate(doc, start=1):
-            f.write(f"--- Page {i} ---\n")
-            f.write(page.get_text(sort=True))
 
+            content = page.get_text(sort=True)
+            normalized = normalize_whitespace(content)
+            normalized = remove_unwanted_unicode(normalized)
 
-def create_mock(input: str, output: str) -> None:
-    contact = schema.Contact(
-        email="john.doe@example.com",
-        phone="+1234567890",
-        address="123 Main Street, London",
-    )
+            apply_extractors(cv, normalized, extractors)
 
-    personal_info = schema.PersonalInfo(
-        full_name="John Doe",
-        date_of_birth=date(1990, 5, 20),
-        nationality="British",
-        contact=contact,
-    )
+            f.write(normalized)
 
-    education = [
-        schema.Education(
-            degree="BSc Computer Science",
-            institution="University of London",
-            start_date=date(2008, 9, 1),
-            end_date=date(2012, 6, 30),
-            field_of_study="Computer Science",
-        )
-    ]
-
-    work_experience = [
-        schema.WorkExperience(
-            job_title="Software Engineer",
-            company="Tech Corp",
-            start_date=date(2012, 7, 1),
-            end_date=date(2018, 12, 31),
-        )
-    ]
-
-    certifications = [
-        schema.Certification(
-            name="AWS Certified Solutions Architect", issuing_organization="Amazon"
-        )
-    ]
-
-    languages = [
-        schema.Language(language="English", proficiency="native"),
-        schema.Language(language="French", proficiency="fluent"),
-    ]
-
-    military_experience = [
-        schema.MilitaryExperience(
-            rank="Lieutenant",
-            branch="Army",
-            start_date=date(2010, 1, 1),
-            end_date=date(2012, 12, 31),
-            duties=["Leadership", "Training", "Operations"],
-        )
-    ]
-
-    skills = ["Python", "Pydantic", "Data Analysis"]
-
-    cv = schema.CVParserSchema(
-        personal_info=personal_info,
-        education=education,
-        work_experience=work_experience,
-        skills=skills,
-        certifications=certifications,
-        languages=languages,
-        military_experience=military_experience,
-    )
-    json_schema = schema.CVParserSchema.model_json_schema()
     with open(output, "w", encoding="utf-8") as f:
-        json.dump(json_schema, f, indent=2)
+        f.write(cv.model_dump_json(indent=2))
 
 
 def main() -> None:
@@ -114,7 +169,9 @@ def main() -> None:
     args = parser.parse_args()
 
     if args.api_mock:
-        create_mock(args.input, args.output)
+        mock = create_mock()
+        with open(args.output, "w", encoding="utf-8") as f:
+            f.write(mock.model_dump_json(indent=2))
         return
 
     parse_file(args.input, args.output)
