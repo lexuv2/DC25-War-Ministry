@@ -6,9 +6,9 @@ GET http://localhost:8080/gmail/labels
 
 GET http://localhost:8080/gmail/inbox/count
 
-### Get Labels
+### Get Mail + attachment
 
-GET http://localhost:8080/gmail/inbox/1
+GET http://localhost:8080/gmail/inbox/2
 
 ### Send new acceptance mail
 

@@ -21,16 +21,16 @@ public class GmailController {
         this.gmailService = gmailService;
     }
 
-    @GetMapping("/labels")
-    public List<String> listLabels() throws Exception {
-        Gmail gmail = gmailService.getService();
-        //System.out.println("1");
-        ListLabelsResponse listResponse = gmail.users().labels().list("me").execute();
-        //System.out.println("2");
-        return listResponse.getLabels().stream()
-                .map(Label::getName)
-                .toList();
-    }
+//    @GetMapping("/labels")
+//    public List<String> listLabels() throws Exception {
+//        Gmail gmail = gmailService.getGmailService();
+//        //System.out.println("1");
+//        ListLabelsResponse listResponse = gmail.users().labels().list("me").execute();
+//        //System.out.println("2");
+//        return listResponse.getLabels().stream()
+//                .map(Label::getName)
+//                .toList();
+//    }
 
     @GetMapping("/inbox/count")
     public int getInboxCount() throws Exception {

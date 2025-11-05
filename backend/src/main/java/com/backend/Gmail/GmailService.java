@@ -1,37 +1,33 @@
 package com.backend.Gmail;
 
 import com.google.api.client.auth.oauth2.Credential;
-import com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInstalledApp;
-import com.google.api.client.extensions.jetty.auth.oauth2.LocalServerReceiver;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
 import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.googleapis.json.GoogleJsonError;
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
-import com.google.api.client.http.HttpRequestInitializer;
+import com.google.api.client.http.AbstractInputStreamContent;
+import com.google.api.client.http.ByteArrayContent;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.client.util.store.FileDataStoreFactory;
 import com.google.api.services.gmail.Gmail;
 import com.google.api.services.gmail.GmailScopes;
-import com.google.api.services.gmail.model.ListMessagesResponse;
+import com.google.api.services.gmail.model.*;
 import com.google.api.services.gmail.model.Message;
-import com.google.api.services.gmail.model.MessagePart;
-import com.google.api.services.gmail.model.MessagePartHeader;
-import com.google.auth.http.HttpCredentialsAdapter;
 import org.apache.commons.codec.binary.Base64;
 import org.springframework.stereotype.Service;
-import com.google.auth.oauth2.GoogleCredentials;
+import com.google.api.services.drive.Drive;
+import com.google.api.services.drive.DriveScopes;
+import com.google.api.services.drive.model.File;
 
 import jakarta.mail.*;
 import jakarta.mail.internet.*;
 
 import java.io.*;
 import java.security.GeneralSecurityException;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 
 @Service
 public class GmailService {
@@ -39,18 +35,26 @@ public class GmailService {
     private static final JsonFactory JSON_FACTORY = GsonFactory.getDefaultInstance();
     private static final String TOKENS_DIRECTORY_PATH = "./tokens";
 
-    private static final List<String> SCOPES = List.of(GmailScopes.GMAIL_READONLY, GmailScopes.GMAIL_LABELS, GmailScopes.GMAIL_COMPOSE, GmailScopes.GMAIL_SEND, GmailScopes.GMAIL_MODIFY);
+    private static final List<String> SCOPES = List.of(GmailScopes.GMAIL_READONLY, GmailScopes.GMAIL_LABELS, GmailScopes.GMAIL_COMPOSE, GmailScopes.GMAIL_SEND, GmailScopes.GMAIL_MODIFY, DriveScopes.DRIVE);
     private static final String CREDENTIALS_FILE_PATH = "/client_secret_270311492495-ip027ghqo1181v4qd288vv2203rjnu5v.apps.googleusercontent.com.json";
 
-    public Gmail getService() throws IOException, GeneralSecurityException {
+    public Gmail getGmailService() throws IOException, GeneralSecurityException {
         final NetHttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
-        Credential credential = getCredentials(httpTransport);
+        Credential credential = getGmailCredentials(httpTransport);
         return new Gmail.Builder(httpTransport, JSON_FACTORY, credential)
                 .setApplicationName(APPLICATION_NAME)
                 .build();
     }
 
-    private Credential getCredentials(final com.google.api.client.http.javanet.NetHttpTransport httpTransport)
+    public Drive getDriveService() throws IOException, GeneralSecurityException {
+        final var httpTransport = GoogleNetHttpTransport.newTrustedTransport();
+        Credential credential = getGmailCredentials(httpTransport);
+        return new Drive.Builder(httpTransport, JSON_FACTORY, credential)
+                .setApplicationName(APPLICATION_NAME)
+                .build();
+    }
+
+    private Credential getGmailCredentials(final com.google.api.client.http.javanet.NetHttpTransport httpTransport)
             throws IOException {
         InputStream in = getClass().getResourceAsStream(CREDENTIALS_FILE_PATH);
         if (in == null) {
@@ -61,7 +65,7 @@ public class GmailService {
 
         GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow.Builder(
                 httpTransport, JSON_FACTORY, clientSecrets, SCOPES)
-                .setDataStoreFactory(new FileDataStoreFactory(new File(TOKENS_DIRECTORY_PATH)))
+                .setDataStoreFactory(new FileDataStoreFactory(new java.io.File(TOKENS_DIRECTORY_PATH)))
                 .setAccessType("offline")
                 .build();
 
@@ -74,7 +78,7 @@ public class GmailService {
     }
 
     public int getInboxMessageCount() throws IOException, GeneralSecurityException {
-        Gmail service = getService();
+        Gmail service = getGmailService();
         ListMessagesResponse response = service.users().messages().list("me").setLabelIds(List.of("INBOX")).execute();
 
         int total = 0;
@@ -94,7 +98,7 @@ public class GmailService {
     }
 
     public Map<String, String> getNthNewestMail(int index) throws IOException, GeneralSecurityException {
-        Gmail service = getService();
+        Gmail service = getGmailService();
 
         // Get list of messages (ordered newest first)
         ListMessagesResponse response = service.users().messages()
@@ -119,14 +123,55 @@ public class GmailService {
         String date = getHeader(headers, "Date");
 
         String snippet = message.getSnippet();
+        List<Map<String, String>> attachments = new ArrayList<>();
 
-        return Map.of(
-                "id", messageId,
-                "from", from,
-                "subject", subject,
-                "date", date,
-                "snippet", snippet
-        );
+        extractAttachments(service, "me", message.getPayload(), messageId, attachments);
+
+        Map<String, String> result = new HashMap<>();
+        result.put("id", messageId);
+        result.put("from", from);
+        result.put("subject", subject);
+        result.put("date", date);
+        result.put("snippet", snippet);
+
+// Add attachment entries (base64-encoded)
+        for (int i = 0; i < attachments.size(); i++) {
+            Map<String, String> entries = attachments.get(i);
+            for (Map.Entry<String, String> entry : entries.entrySet()) {
+                uploadAttachmentToDrive(entry);
+                result.put("attachment_" + (i + 1) + "_filename", entry.getKey());
+                result.put("attachment_" + (i + 1) + "_data", entry.getValue());
+            }
+        }
+
+        return result;
+    }
+
+    private void extractAttachments(Gmail service, String userId, MessagePart part, String messageId, List<Map<String, String>> attachments) throws IOException {
+        if (part.getFilename() != null && !part.getFilename().isEmpty()) {
+            String filename = part.getFilename().toLowerCase();
+            if (filename.endsWith(".pdf") || filename.endsWith(".docx")) {
+                String attachmentId = part.getBody().getAttachmentId();
+                if (attachmentId != null) {
+                    MessagePartBody attachPart = service.users().messages().attachments()
+                            .get(userId, messageId, attachmentId)
+                            .execute();
+
+//                    byte[] fileData = Base64.decodeBase64(attachPart.getData());
+//                    String base64 = Base64.encodeBase64String(fileData);
+
+                    attachments.add(Map.of(
+                            filename, attachPart.getData()
+                    ));
+                }
+            }
+        }
+
+        if (part.getParts() != null) {
+            for (MessagePart subPart : part.getParts()) {
+                extractAttachments(service, userId, subPart, messageId, attachments);
+            }
+        }
     }
 
     private String getHeader(List<MessagePartHeader> headers, String name) {
@@ -137,9 +182,50 @@ public class GmailService {
                 .orElse("(unknown)");
     }
 
+    public File uploadAttachmentToDrive(Map.Entry<String, String> attachment
+    ) throws IOException, GeneralSecurityException {
+
+        // Extract filename and decode base64 content
+        String filename = attachment.getKey();
+        byte[] fileData = Base64.decodeBase64(attachment.getValue());
+
+        // Automatically determine MIME type based on file extension
+        String mimeType;
+        if (filename.toLowerCase().endsWith(".pdf")) {
+            mimeType = "application/pdf";
+        } else if (filename.toLowerCase().endsWith(".docx")) {
+            mimeType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+        } else {
+            throw new IllegalArgumentException("Unsupported file type: " + filename);
+        }
+
+        // Prepare Drive file metadata
+        File fileMetadata = new File();
+        fileMetadata.setName(filename);
+
+        // Use in-memory ByteArrayContent instead of reading from disk
+        AbstractInputStreamContent contentStream = new ByteArrayContent(mimeType, fileData);
+
+        Drive driveService = getDriveService();
+        // Upload the file to Google Drive
+        File uploadedFile = driveService.files()
+                .create(fileMetadata, contentStream)
+                .setFields("id, name, mimeType, webViewLink")
+                .execute();
+
+        System.out.println("File uploaded to Google Drive:");
+        System.out.println(" - Name: " + uploadedFile.getName());
+        System.out.println(" - ID: " + uploadedFile.getId());
+        System.out.println(" - MIME type: " + uploadedFile.getMimeType());
+        System.out.println(" - Link: " + uploadedFile.getWebViewLink());
+
+        return uploadedFile;
+    }
+
+
     public Boolean sendMail(PutMailRequest putMailRequest) throws IOException, GeneralSecurityException, MessagingException {
         // Create the gmail API client
-        Gmail service = getService();
+        Gmail service = getGmailService();
 
         // Create the email content
         String messageSubject = putMailRequest.wasAccepted() ? "Twoje zgłoszenie zostało akceptowane!" : "Twoje zgłoszenie zostało odrzucone.";
