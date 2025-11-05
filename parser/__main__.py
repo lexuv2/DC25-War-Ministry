@@ -10,7 +10,7 @@ def parse_file(input: str, output: str) -> None:
     with open(output, "w", encoding="utf-8") as f:
         for i, page in enumerate(doc, start=1):
             f.write(f"--- Page {i} ---\n")
-            f.write(page.get_text())
+            f.write(page.get_text(sort=True))
 
 
 def create_mock(input: str, output: str) -> None:
