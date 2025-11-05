@@ -1,3 +1,16 @@
+#!/usr/bin/env python3
+import sys
+
+
+def check_if_in_env() -> None:
+    if sys.prefix == sys.base_prefix:
+        print("❌ Please activate your virtual environment first!")
+        print("   (e.g., 'source venv/bin/activate' or 'venv\\Scripts\\activate')")
+        sys.exit(1)
+
+
+check_if_in_env()
+
 import fitz
 import argparse
 from src import schema

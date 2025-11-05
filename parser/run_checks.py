@@ -1,4 +1,16 @@
 #!/usr/bin/env python3
+import sys
+
+
+def check_if_in_env() -> None:
+    if sys.prefix == sys.base_prefix:
+        print("❌ Please activate your virtual environment first!")
+        print("   (e.g., 'source venv/bin/activate' or 'venv\\Scripts\\activate')")
+        sys.exit(1)
+
+
+check_if_in_env()
+
 import os
 import subprocess
 import sys
@@ -11,16 +23,7 @@ def run(cmd: list[str], **kwargs: Any) -> None:
     subprocess.check_call(cmd, **kwargs)
 
 
-def check_if_in_env() -> None:
-    if sys.prefix == sys.base_prefix:
-        print("❌ Please activate your virtual environment first!")
-        print("   (e.g., 'source venv/bin/activate' or 'venv\\Scripts\\activate')")
-        sys.exit(1)
-
-
 def main() -> None:
-    check_if_in_env()
-
     black_cmd = ["black", "."]
     mypy_cmd = ["mypy", "."]
 
