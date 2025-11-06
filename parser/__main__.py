@@ -19,6 +19,9 @@ from datetime import date
 from typing import Optional, Any, List
 import re
 import unicodedata
+import spacy
+
+nlp = spacy.load("pl_core_news_sm")
 
 
 def normalize_whitespace(text: str) -> str:
@@ -90,7 +93,7 @@ def extract_email(text: str) -> Optional[str]:
 
     emails = email_pattern.findall(text)
     occurences = list(set(emails))
-
+    print(f"Found emails: {emails}")
     if len(occurences) > 0:
         return str(occurences[0])
 
@@ -103,10 +106,23 @@ def extract_phone(text: str) -> Optional[str]:
     )
     phones = phone_pattern.findall(text)
     occurences = list(set(phones))
-
+    print(f"Found phones: {phones}")
     if len(occurences) > 0:
         return str(occurences[0])
 
+    return None
+
+
+def extract_name(text: str) -> Optional[str]:
+    doc = nlp(text)
+    names = []
+
+    for ent in doc.ents:
+        if ent.label_ == "persName":
+            names.append(ent.text)
+    print(f"Found names: {names}")
+    if len(names) > 0:
+        return str(names[0])
     return None
 
 
@@ -134,6 +150,7 @@ def parse_file(input: str, output: str) -> None:
     extractors = [
         (extract_email, "personal_info.contact.email"),
         (extract_phone, "personal_info.contact.phone"),
+        (extract_name, "personal_info.full_name"),
     ]
 
     with open(f"{output}.txt", "w", encoding="utf-8") as f:
