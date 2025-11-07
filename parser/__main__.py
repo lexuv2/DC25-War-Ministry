@@ -39,14 +39,14 @@ def main() -> None:
     if args.api_mock:
         mock = parser.create_mock()
         with open(args.output, "w", encoding="utf-8") as f:
-            f.write(mock.model_dump_json(indent=2))
+            f.write(mock.model_dump_json(indent=2, ensure_ascii=False))
         return
 
     cv = parser.parse_file(
         args.input, enable_log=True, log_output=os.path.dirname(args.output)
     )
     with open(args.output, "w", encoding="utf-8") as f:
-        f.write(cv.model_dump_json(indent=2))
+        f.write(cv.model_dump_json(indent=2, ensure_ascii=False))
 
 
 if __name__ == "__main__":

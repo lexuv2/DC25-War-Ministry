@@ -6,12 +6,14 @@ import unicodedata
 from src import schema
 import fitz
 import os
-from pyparsing import Word, OneOrMore, pyparsing_unicode as ppu
+from pyparsing import Word, OneOrMore, SkipTo, Combine, pyparsing_unicode as ppu
+
 
 class Parser:
     def __init__(self) -> None:
         self.nlp = spacy.load("pl_core_news_sm")
-        self.name_alphas = ppu.Latin1.alphas + ppu.LatinA.alphas + ppu.LatinB.alphas + "-"
+        self.base_alphas = ppu.Latin1.alphas + ppu.LatinA.alphas + ppu.LatinB.alphas
+        self.name_alphas = self.base_alphas + "-"
 
     def _normalize_whitespace(self, text: str) -> str:
         """
@@ -59,11 +61,11 @@ class Parser:
                 cleaned.append(ch)
                 continue
             # Allow some ASCII symbols
-            if ch == ' ' or ch == '-':
+            if ch == " " or ch == "-":
                 cleaned.append(ch)
                 continue
-            if ch == '\n' or ch == '\t':
-                cleaned.append(' ')
+            if ch == "\n" or ch == "\t":
+                cleaned.append(" ")
                 continue
             # Allow Latin letters with accents (e.g., Polish, Czech, etc.)
             cat = unicodedata.name(ch, "")
@@ -71,6 +73,10 @@ class Parser:
                 cleaned.append(ch)
                 continue
         return "".join(cleaned).strip()
+
+    def _text_contains_a_year(self, text: str) -> bool:
+        """Return True if text contains a number between 1900 and 2100."""
+        return re.search(r"\b(19\d\d|20\d\d|2100)\b", text) is not None
 
     def create_mock(self) -> schema.CVParserSchema:
 
@@ -89,6 +95,7 @@ class Parser:
 
         return schema.CVParserSchema(
             personal_info=personal_info,
+            overview="",
             education=[],
             work_experience=[],
             skills=[],
@@ -140,11 +147,11 @@ class Parser:
                 normalized = self._remove_unwanted_chars_in_fullname(ent.text)
                 capitilized = self._capitilize_fullname(normalized)
                 names.append(capitilized)
-        
+
         if len(names) > 0:
             print(f"Found names: {names}")
             return str(names[0])
-        
+
         # If fails find the first two valid words
         name_word = Word(self.name_alphas)
         tokens = [t[0] for t in name_word.searchString(text)]
@@ -155,6 +162,58 @@ class Parser:
         print(f"Found names: {names}")
         if len(names) > 0:
             return str(names[0])
+        return None
+
+    def _extract_overview(self, text: str) -> Optional[str]:
+        section_body = SkipTo("\n\n", include=False)
+        section_parser = Combine(section_body + "\n\n")
+
+        results = [res[0].strip() for res, _, _ in section_parser.scanString(text)]
+
+        base_word = Word(self.base_alphas)
+
+        MIN_SENTECE_AMMOUNT = 2
+        MIN_WORDS_IN_SENTENCE = 4
+        MIN_WORD_LENGTH = 3
+
+        valid_sections = []
+        for section in results:
+
+            # Either an Education or Experience section
+            if self._text_contains_a_year(section):
+                continue
+
+            valid_sentence_count = 0
+            sentences = re.split(r"[.!?]", section)
+
+            for sentence in sentences:
+                tokens = [t[0] for t in base_word.searchString(sentence)]
+                filtered = [t for t in tokens if len(t) >= MIN_WORD_LENGTH]
+
+                if len(filtered) < MIN_WORDS_IN_SENTENCE:
+                    continue
+
+                # First letter in sentence has to be capital
+                if not filtered[0][0].isupper():
+                    continue
+
+                valid_sentence_count += 1
+
+            if valid_sentence_count < MIN_SENTECE_AMMOUNT:
+                continue
+
+            # Output only words without special chars
+            filtered_section = [t[0] for t in base_word.searchString(section)]
+            valid_sections.append(" ".join(filtered_section))
+
+        if len(valid_sections) > 0:
+            print(f"Found about sections:")
+
+            for section in valid_sections:
+                print(valid_sections)
+
+            return valid_sections[0]
+
         return None
 
     def _apply_extractors(
@@ -188,6 +247,7 @@ class Parser:
             (self._extract_email, "personal_info.contact.email"),
             (self._extract_phone, "personal_info.contact.phone"),
             (self._extract_name, "personal_info.full_name"),
+            (self._extract_overview, "overview"),
         ]
 
         log_content = []

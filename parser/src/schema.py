@@ -73,6 +73,7 @@ class MilitaryExperience(BaseModel):
 
 class CVParserSchema(BaseModel):
     personal_info: PersonalInfo
+    overview: str
     education: List[Education]
     work_experience: List[WorkExperience]
     skills: List[str]
