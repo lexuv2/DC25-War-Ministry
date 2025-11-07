@@ -6,5 +6,5 @@ exclude = ["test", "conftest.py"]
 [tool.pytest.ini_options]
 minversion = "6.0"
 addopts = "-ra -q -v"
-testpaths = ["test/pydantic"]
+testpaths = ["test/pydantic", "test/pdf"]
 pythonpath = "."
