@@ -42,7 +42,9 @@ def main() -> None:
             f.write(mock.model_dump_json(indent=2))
         return
 
-    cv = parser.parse_file(args.input, os.path.dirname(args.output))
+    cv = parser.parse_file(
+        args.input, enable_log=True, log_output=os.path.dirname(args.output)
+    )
     with open(args.output, "w", encoding="utf-8") as f:
         f.write(cv.model_dump_json(indent=2))
 

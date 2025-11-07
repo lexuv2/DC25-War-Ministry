@@ -126,7 +126,9 @@ class Parser:
                 target = getattr(target, part)
             setattr(target, parts[-1], value)
 
-    def parse_file(self, input: str, log_output: str) -> schema.CVParserSchema:
+    def parse_file(
+        self, input: str, enable_log: bool = False, log_output: str = ""
+    ) -> schema.CVParserSchema:
 
         file_basename = os.path.basename(input)
 
@@ -139,17 +141,23 @@ class Parser:
             (self._extract_name, "personal_info.full_name"),
         ]
 
-        with open(
-            os.path.join(log_output, f"raw-{file_basename}.txt"), "w", encoding="utf-8"
-        ) as f:
-            for i, page in enumerate(doc, start=1):
+        log_content = []
 
-                content = page.get_text(sort=True)
-                normalized = self._normalize_whitespace(content)
-                normalized = self._remove_unwanted_unicode(normalized)
+        for i, page in enumerate(doc, start=1):
 
-                self._apply_extractors(cv, normalized, extractors)
+            content = page.get_text(sort=True)
+            normalized = self._normalize_whitespace(content)
+            normalized = self._remove_unwanted_unicode(normalized)
+            log_content.append(normalized)
+            self._apply_extractors(cv, normalized, extractors)
 
-                f.write(normalized)
+        if enable_log:
+            with open(
+                os.path.join(log_output, f"raw-{file_basename}.txt"),
+                "w",
+                encoding="utf-8",
+            ) as f:
+                for content in log_content:
+                    f.write(content)
 
         return cv
