@@ -27,9 +27,9 @@ def test_parser_results(pdf_name, pdf_path):
     result_dict = cv.model_dump(mode="json")
 
     print("RESULT DICT")
-    print(json.dumps(result_dict, indent=2))
+    print(json.dumps(result_dict, indent=2, ensure_ascii=False))
     print("EXPECTED DICT")
-    print(json.dumps(result_dict, indent=2))
+    print(json.dumps(expected_data, indent=2, ensure_ascii=False))
     assert_dict_recursive(result_dict, expected_data, path=pdf_name)
 
 
