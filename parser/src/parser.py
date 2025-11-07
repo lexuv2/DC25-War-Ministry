@@ -6,11 +6,12 @@ import unicodedata
 from src import schema
 import fitz
 import os
-
+from pyparsing import Word, OneOrMore, pyparsing_unicode as ppu
 
 class Parser:
     def __init__(self) -> None:
         self.nlp = spacy.load("pl_core_news_sm")
+        self.name_alphas = ppu.Latin1.alphas + ppu.LatinA.alphas + ppu.LatinB.alphas + "-"
 
     def _normalize_whitespace(self, text: str) -> str:
         """
@@ -45,8 +46,31 @@ class Parser:
             if ch in "•–—…«»©®°":
                 cleaned.append(ch)
                 continue
-            # Otherwise skip (emoji, CJK, etc.)
         return "".join(cleaned)
+
+    def _remove_unwanted_chars_in_fullname(self, text: str) -> str:
+        """
+        Keep only ASCII letters, common Latin letters and spaces
+        """
+        cleaned = []
+        for ch in text:
+            # Allow ASCII letters
+            if 65 <= ord(ch) <= 90 or 97 <= ord(ch) <= 122:
+                cleaned.append(ch)
+                continue
+            # Allow some ASCII symbols
+            if ch == ' ' or ch == '-':
+                cleaned.append(ch)
+                continue
+            if ch == '\n' or ch == '\t':
+                cleaned.append(' ')
+                continue
+            # Allow Latin letters with accents (e.g., Polish, Czech, etc.)
+            cat = unicodedata.name(ch, "")
+            if "LATIN" in cat or "WITH" in cat:
+                cleaned.append(ch)
+                continue
+        return "".join(cleaned).strip()
 
     def create_mock(self) -> schema.CVParserSchema:
 
@@ -96,13 +120,38 @@ class Parser:
 
         return None
 
+    def _capitilize_fullname(self, name: str) -> str:
+        words = name.split(" ")
+        result = []
+        for word in words:
+            if "-" in word:
+                capitalized = [w.capitalize() for w in word.split("-")]
+                result.append("-".join(capitalized))
+                continue
+            result.append(word.capitalize())
+        return " ".join(result)
+
     def _extract_name(self, text: str) -> Optional[str]:
         parsed_entities = self.nlp(text)
         names = []
 
         for ent in parsed_entities.ents:
-            if ent.label_ == "persName":
-                names.append(ent.text)
+            if ent.label_ == "persName" and " " in ent.label_:
+                normalized = self._remove_unwanted_chars_in_fullname(ent.text)
+                capitilized = self._capitilize_fullname(normalized)
+                names.append(capitilized)
+        
+        if len(names) > 0:
+            print(f"Found names: {names}")
+            return str(names[0])
+        
+        # If fails find the first two valid words
+        name_word = Word(self.name_alphas)
+        tokens = [t[0] for t in name_word.searchString(text)]
+        first_2_words = tokens[:2]
+        capitilized = self._capitilize_fullname(" ".join(first_2_words))
+        names.append(capitilized)
+
         print(f"Found names: {names}")
         if len(names) > 0:
             return str(names[0])

@@ -33,6 +33,7 @@ pydantic==2.12.3
 pydantic_core==2.41.4
 Pygments==2.19.2
 PyMuPDF==1.26.5
+pyparsing==3.2.5
 pytest==8.4.2
 pytokens==0.1.10
 requests==2.32.5
