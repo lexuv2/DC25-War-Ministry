@@ -11,7 +11,14 @@
             }
         },
         "overview": "Jestem studentem Politechniki Gdańskiej Jestem osobą uczciwą i nie potrafię kłamać ponieważ w biznesie nikt nie kłamie nie tak jak twierdzą niektórzy ludzie Jestem bardzo sympatyczny i mam bardzo dużo kolegów i koleżanek Stanowie najlepszego kandydata na pracownika",
-        "education": [],
+        "education": [
+            {
+                "degree": "UNKNOWN",
+                "institution": "Politechnika Gdańska",
+                "start_date": "2025-01-01",
+                "field_of_study": "kierunek Informatyka"
+            }
+        ],
         "work_experience": [],
         "skills": [],
         "certifications": [],
@@ -30,7 +37,15 @@
             }
         },
         "overview": "Jestem studentem Politechniki Gdańskiej Jestem osobą uczciwą i nie potrafię kłamać ponieważ w biznesie nikt nie kłamie nie tak jak twierdzą niektórzy ludzie Jestem bardzo sympatyczny i mam bardzo dużo kolegów i koleżanek Stanowie najlepszego kandydata na pracownika",
-        "education": [],
+        "education": [
+            {
+                "degree": "UNKNOWN",
+                "institution": "Politechnika Gdańska",
+                "start_date": "2022-01-01",
+                "end_date": "2025-01-01",
+                "field_of_study": "kiernunek Informatyka"
+            }
+        ],
         "work_experience": [],
         "skills": [],
         "certifications": [],
@@ -49,7 +64,14 @@
             }
         },
         "overview": "Jestem studentem Politechniki Gdańskiej Jestem osobą uczciwą i nie potrafię kłamać ponieważ w biznesie nikt nie kłamie nie tak jak twierdzą niektórzy ludzie Jestem bardzo sympatyczny i mam bardzo dużo kolegów i koleżanek Stanowie najlepszego kandydata na pracownika",
-        "education": [],
+        "education": [
+            {
+                "degree": "UNKNOWN",
+                "institution": "Politechnika Gdańska",
+                "start_date": "2025-12-01",
+                "field_of_study": "kierunek Informatyka"
+            }
+        ],
         "work_experience": [],
         "skills": [],
         "certifications": [],
@@ -68,7 +90,14 @@
             }
         },
         "overview": "O Mnie Jestem studentem Politechniki Gdańskiej Jestem osobą uczciwą i nie potrafię kłamać ponieważ w biznesie nikt nie kłamie nie tak jak twierdzą niektórzy ludzie Jestem bardzo sympatyczny i mam bardzo dużo kolegów i koleżanek Stanowie najlepszego kandydata na pracownika",
-        "education": [],
+        "education": [
+            {
+                "degree": "UNKNOWN",
+                "institution": "Politechnika Gdańska",
+                "start_date": "2025-01-01",
+                "field_of_study": "kierunek Informatyka"
+            }
+        ],
         "work_experience": [],
         "skills": [],
         "certifications": [],
@@ -87,7 +116,14 @@
             }
         },
         "overview": "Jestem studentem Politechniki Gdańskiej Jestem osobą uczciwą i nie potrafię kłamać ponieważ w biznesie nikt nie kłamie nie tak jak twierdzą niektórzy ludzie Jestem bardzo sympatyczny i mam bardzo dużo kolegów i koleżanek Stanowie najlepszego kandydata na pracownika",
-        "education": [],
+        "education": [
+            {
+                "degree": "UNKNOWN",
+                "institution": "Politechnika Gdańska",
+                "start_date": "2025-01-01",
+                "field_of_study": "kierunek Informatyka"
+            }
+        ],
         "work_experience": [],
         "skills": [],
         "certifications": [],
@@ -106,7 +142,14 @@
             }
         },
         "overview": "Jestem studentem Politechniki Gdańskiej Jestem osobą uczciwą i nie potrafię kłamać ponieważ w biznesie nikt nie kłamie nie tak jak twierdzą niektórzy ludzie Jestem bardzo sympatyczny i mam bardzo dużo kolegów i koleżanek Stanowie najlepszego kandydata na pracownika",
-        "education": [],
+        "education": [
+            {
+                "degree": "UNKNOWN",
+                "institution": "Politechnika Gdańska",
+                "start_date": "1900-01-01",
+                "field_of_study": "kierunek Informatyka"
+            }
+        ],
         "work_experience": [],
         "skills": [],
         "certifications": [],
@@ -125,7 +168,15 @@
             }
         },
         "overview": "Jestem studentem Politechniki Gdańskiej Jestem osobą uczciwą i nie potrafię kłamać ponieważ w biznesie nikt nie kłamie nie tak jak twierdzą niektórzy ludzie Jestem bardzo sympatyczny i mam bardzo dużo kolegów i koleżanek Stanowie najlepszego kandydata na pracownika",
-        "education": [],
+        "education": [
+            {
+                "degree": "UNKNOWN",
+                "institution": "Politechnika Gdańska",
+                "start_date": "2022-01-01",
+                "end_date": "2025-01-01",
+                "field_of_study": "Kierunek Informatyka"
+            }
+        ],
         "work_experience": [],
         "skills": [],
         "certifications": [],
@@ -144,8 +195,21 @@
             }
           },
           "overview": "Zorganizowany oddany i ambitny początkujący profesjonalista wyjątkowo zwracający uwagę na szczegóły chętnie doskonalący wiedzę zainteresowany ścisłą współpracą z doświadczonymi ludźmi i przyczynieniem się do sukcesu wojska Posiadam wykształcenie wyższe i doświadczenie zawodowe w mechanice i operowaniu maszyn przemysłowych Szukam posady początkującego operatora wajchy",
-          "education": [],
-          "work_experience": [],
+        "education": [
+            {
+                "degree": "Magister",
+                "institution": "Wyższa Szkoła Robienia Hałasu",
+                "start_date": "2014-06-01",
+                "field_of_study": "nauk o operowaniu wajchą"
+            },
+            {
+                "degree": "Licencjat",
+                "institution": "Wyższa Szkoła Robienia Hałasu",
+                "start_date": "2012-06-01",
+                "field_of_study": "nauk o operowaniu wajchą"
+            }
+        ],
+        "work_experience": [],
           "skills": [],
           "certifications": [],
           "languages": [],
@@ -163,8 +227,15 @@
             }
           },
           "overview": "Ambitny i pracowity człowiek z bogatą przeszłością Zorientowany w świecie niezorientowany w ludziach Normalny do podłogi Niekarany",
-          "education": [],
-          "work_experience": [],
+        "education": [
+            {
+                "degree": "Magister",
+                "institution": "Zasadnicza Szkoła Zawodowa nr.1 w Lipcach Reymontowskich",
+                "start_date": "1900-01-01",
+                "field_of_study": "Zawód: stolarz"
+            }
+        ],
+        "work_experience": [],
           "skills": [],
           "certifications": [],
           "languages": [],
@@ -182,8 +253,16 @@
             }
           },
           "overview": "CELE Z pasją i precyzją obsługuję wszelkie urządzenia wymagające odpowiedzialnego pociągnięcia przesunięcia lub przełączenia wajchy Działam skutecznie nie zadając zbędnych pytań Nie boję się ciężkiej pracy ani ciężkich wajch Zawsze punktualny pojawiam się przy wajsze na czas Moje motto Jedna wajcha jedno życie",
-          "education": [],
-          "work_experience": [],
+        "education": [
+            {
+                "degree": "Magister",
+                "institution": "Politechnika Wajchowa, Wydział Mechaniki Praktycznej",
+                "start_date": "2005-01-01",
+                "end_date": "2010-01-01",
+                "field_of_study": "Inżynierii Mechanicznej"
+            }
+        ],
+        "work_experience": [],
           "skills": [],
           "certifications": [],
           "languages": [],
