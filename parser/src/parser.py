@@ -14,6 +14,7 @@ class Parser:
         self.nlp = spacy.load("pl_core_news_sm")
         self.base_alphas = ppu.Latin1.alphas + ppu.LatinA.alphas + ppu.LatinB.alphas
         self.name_alphas = self.base_alphas + "-"
+        self.alphanum_alphas = self.base_alphas + ppu.Latin1.nums + ppu.LatinA.nums + ppu.LatinB.nums
 
     def _normalize_whitespace(self, text: str) -> str:
         """
@@ -77,6 +78,27 @@ class Parser:
     def _text_contains_a_year(self, text: str) -> bool:
         """Return True if text contains a number between 1900 and 2100."""
         return re.search(r"\b(19\d\d|20\d\d|2100)\b", text) is not None
+    
+    def _return_years_in_text(self, text: str) -> List[int]:
+        """Return list of years (numbers between 1900 and 2100) found in text."""
+        years = re.findall(r"\b(19\d\d|20\d\d|2100)\b", text)
+        return [int(year) for year in years]
+    
+    def _text_contains_edu_institution(self, text: str) -> bool:
+        """Return True if text contains common education institution keywords."""
+        keywords = [
+            "żłobek",
+            "szkoła",
+            "gimnazjum",
+            "liceum",
+            "technikum",
+            "politechnika",
+            "uniwersytet",
+            "akademia",
+            "kolegium",
+        ]
+        pattern = re.compile(r"(" + "|".join(keywords) + r")", re.IGNORECASE)
+        return pattern.search(text) is not None
 
     def create_mock(self) -> schema.CVParserSchema:
 
@@ -215,6 +237,54 @@ class Parser:
             return valid_sections[0]
 
         return None
+    
+    def _extract_education(self, text: str) -> Optional[str]:
+        section_body = SkipTo("\n\n", include=False)
+        section_parser = Combine(section_body + "\n\n")
+
+        results = [res[0].strip() for res, _, _ in section_parser.scanString(text)]
+
+        base_word = Word(self.alphanum_alphas)
+
+        education_sections = list()
+        for section in results:
+
+            # Anything other than Education section, unless working in educational institution
+            # if (not self._text_contains_a_year(section)) or (not self._text_contains_edu_institution(section)):
+            # should be like this ^, not every CV will have years in education
+            if not self._text_contains_edu_institution(section):
+                continue
+
+            filtered_section = [t[0] for t in base_word.searchString(section)]
+
+            # Output only words without special chars
+            # parsed_entities = self.nlp(" ".join(filtered_section))
+            # parsed_entities = self.nlp(section)
+            # names = []
+
+            # print(f"Processing education section: {[[ent.text.strip(), ent.label_] for ent in parsed_entities.ents]}")
+
+            section_str = " ".join(filtered_section)
+            date_years = self._return_years_in_text(section_str)
+
+
+            education_sections.append(schema.Education(
+                degree=section_str,
+                institution="UNKNOWN",
+                start_date=date(date_years[0], 1, 1) if date_years[0] else date(1900, 1, 1),
+                end_date=date(date_years[-1], 1, 1) if date_years[-1] else None,
+                field_of_study="UNKNOWN",
+            ))
+
+        if len(education_sections) > 0:
+            print(f"Found education sections:")
+
+            for section in education_sections:
+                print(section)
+
+            return education_sections
+
+        return None
 
     def _apply_extractors(
         self, cv: Any, text: str, extractors: list[tuple[Any, str]]
@@ -248,6 +318,7 @@ class Parser:
             (self._extract_phone, "personal_info.contact.phone"),
             (self._extract_name, "personal_info.full_name"),
             (self._extract_overview, "overview"),
+            (self._extract_education, "education"),
         ]
 
         log_content = []
