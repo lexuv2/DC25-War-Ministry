@@ -4,12 +4,21 @@ import logging
 
 BASE_LOG_DIR = "logs"
 
+
 @pytest.fixture(autouse=True)
 def capture_test_logs(request, capsys):
     test_dir = os.path.basename(os.path.dirname(request.fspath))
     test_file = str(os.path.basename(request.fspath)).replace(".py", ".log")
 
-    log_path = os.path.join(BASE_LOG_DIR, test_dir, test_file)
+    test_name = request.node.name
+    safe_test_name = (
+        test_name.replace("/", "_")
+        .replace("[", "__")
+        .replace("]", "")
+        .replace(":", "_")
+    )
+
+    log_path = os.path.join(BASE_LOG_DIR, test_dir, f"{safe_test_name}.log")
 
     os.makedirs(os.path.dirname(log_path), exist_ok=True)
 
