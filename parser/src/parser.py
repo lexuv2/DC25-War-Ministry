@@ -1,6 +1,6 @@
 import spacy
 from datetime import date
-from typing import Optional, Any, List
+from typing import Optional, Any, List, Tuple
 import re
 import unicodedata
 from src import schema
@@ -83,6 +83,54 @@ class Parser:
         """Return list of years (numbers between 1900 and 2100) found in text."""
         years = re.findall(r"\b(19\d\d|20\d\d|2100)\b", text)
         return [int(year) for year in years]
+
+    def _parse_month_years_in_text(self, text: str) -> List[Tuple[int, Optional[int]]]:
+        months_map = {
+            # Polish full forms and common abbreviations/stems
+            "styczen": 1, "stycznia": 1, "sty": 1, "styc": 1,
+            "luty": 2, "lutego": 2, "lut": 2,
+            "marzec": 3, "marca": 3, "mar": 3,
+            "kwiecien": 4, "kwietnia": 4, "kwi": 4,
+            "maj": 5,
+            "czerwiec": 6, "czerwca": 6, "cze": 6, "czerw": 6,
+            "lipiec": 7, "lipca": 7, "lip": 7,
+            "sierpien": 8, "sierpnia": 8, "sie": 8, "sierp": 8,
+            "wrzesien": 9, "wrzesnia": 9, "wrz": 9, "wrzes": 9,
+            "pazdziernik": 10, "pazdziernika": 10, "październik": 10, "paź": 10, "paz": 10,
+            "listopad": 11, "listopada": 11, "lis": 11,
+            "grudzien": 12, "grudnia": 12, "gru": 12,
+            # English months to be tolerant
+            "january": 1, "february": 2, "march": 3, "april": 4, "may": 5,
+            "june": 6, "july": 7, "august": 8, "september": 9, "october": 10,
+            "november": 11, "december": 12,
+        }
+
+        results: List[Tuple[int, Optional[int]]] = []
+
+        def norm(s: str) -> str:
+            return unicodedata.normalize("NFKD", s).encode("ascii", "ignore").decode("ascii").lower()
+
+        norm_text = norm(text)
+
+        # month-name + year
+        for m_name, m_num in months_map.items():
+            pat = rf"\b{re.escape(norm(m_name))}\b\s*(19\d\d|20\d\d|2100)"
+            for m in re.finditer(pat, norm_text, flags=re.IGNORECASE):
+                yr = int(m.group(1))
+                results.append((yr, m_num))
+
+        # numeric month/year
+        for m in re.finditer(r"(\d{1,2})[\./-](19\d\d|20\d\d|2100)", text):
+            mon = int(m.group(1))
+            yr = int(m.group(2))
+            if 1 <= mon <= 12:
+                results.append((yr, mon))
+
+        if not results:
+            for y in self._return_years_in_text(text):
+                results.append((y, None))
+
+        return results
     
     def _text_contains_edu_institution(self, text: str) -> bool:
         """Return True if text contains common education institution keywords."""
@@ -237,52 +285,238 @@ class Parser:
             return valid_sections[0]
 
         return None
-    
-    def _extract_education(self, text: str) -> Optional[str]:
+
+    def _extract_education(self, text: str) -> Optional[List[schema.Education]]:
         section_body = SkipTo("\n\n", include=False)
         section_parser = Combine(section_body + "\n\n")
-
-        results = [res[0].strip() for res, _, _ in section_parser.scanString(text)]
+        blocks = [res[0].strip() for res, _, _ in section_parser.scanString(text)]
 
         base_word = Word(self.alphanum_alphas)
+        edu_list: List[schema.Education] = []
 
-        education_sections = list()
-        for section in results:
-
-            # Anything other than Education section, unless working in educational institution
-            # if (not self._text_contains_a_year(section)) or (not self._text_contains_edu_institution(section)):
-            # should be like this ^, not every CV will have years in education
-            if not self._text_contains_edu_institution(section):
+        for b in blocks:
+            if not self._text_contains_edu_institution(b):
+                continue
+            if not (self._text_contains_a_year(b) or re.search(r"\b(licencjat|magister|in[żz]ynier|mgr|lic\.|bachelor|master|kierunek)\b", b, re.IGNORECASE)):
                 continue
 
-            filtered_section = [t[0] for t in base_word.searchString(section)]
+            cleaned = " ".join(line.strip() for line in b.splitlines() if line.strip())
+            # remove leading section headings like 'Edukacja' that may be
+            # glued to the institution name in extracted text
+            cleaned = re.sub(r"^(Edukacja|EDUKACJA|Education)[:\-\s]*", "", cleaned, flags=re.IGNORECASE)
 
-            # Output only words without special chars
-            # parsed_entities = self.nlp(" ".join(filtered_section))
-            # parsed_entities = self.nlp(section)
-            # names = []
+            # split by visible degree markers so multiple educations become separate items
+            subblocks = re.split(r"(?=(?:licencjat|magister|in[żz]ynier|mgr|lic\.|kierunek))", cleaned, flags=re.IGNORECASE)
+            if len(subblocks) == 1:
+                subblocks = [cleaned]
 
-            # print(f"Processing education section: {[[ent.text.strip(), ent.label_] for ent in parsed_entities.ents]}")
+            for sb in subblocks:
+                sb = sb.strip()
+                if not sb:
+                    continue
+                months = self._parse_month_years_in_text(sb)
+                years = [y for (y, m) in months]
 
-            section_str = " ".join(filtered_section)
-            date_years = self._return_years_in_text(section_str)
+                degree = "UNKNOWN"
+                institution = "UNKNOWN"
+                field_of_study = "UNKNOWN"
 
+                # capture field of study like 'kierunek Informatyka' keeping prefix
+                # accept small misspellings like 'kiernunek' by matching kierun\w*
+                k = re.search(r"(kierun\w*)\s+([A-Za-zĄĆĘŁŃÓŚŹŻąćęłńóśźż0-9\s\-:]+)", sb, re.IGNORECASE)
+                if k:
+                    field_of_study = k.group(0).strip()
 
-            education_sections.append(schema.Education(
-                degree=section_str,
-                institution="UNKNOWN",
-                start_date=date(date_years[0], 1, 1) if date_years[0] else date(1900, 1, 1),
-                end_date=date(date_years[-1], 1, 1) if date_years[-1] else None,
-                field_of_study="UNKNOWN",
-            ))
+                inst_match = re.search(r"([A-Za-zĄĆĘŁŃÓŚŹŻ0-9\,\.\-\s]{2,120}(?:szko\w*|szkoła|gimnazjum|liceum|technikum|politechnika|uniwersytet|akademia|kolegium)[^\n,\.;]*)", sb, re.IGNORECASE)
+                if inst_match:
+                    institution = inst_match.group(1).strip()
+                    # strip stray year tokens, parentheses and section words
+                    institution = re.sub(r"\b(19\d\d|20\d\d|2100)\b", "", institution)
+                    institution = re.sub(r"\(.*?\)", "", institution)
+                    institution = re.sub(r"\b(Edukacja|edukacja|kierun\w*)\b.*$", "", institution, flags=re.IGNORECASE).strip()
+                    # remove trailing month words that sometimes leak into institution
+                    months_pattern_short = r"\b(styczen|stycznia|styc|sty|luty|lutego|lut|marzec|marca|mar|kwiecien|kwietnia|kwi|kwiecie[nń]|maj|czerwiec|czerwca|cze|czerw|lipiec|lipca|lip|sierpien|sierpnia|sierp|sie|wrzesie[nń]|wrzesnia|wrz|wrzes|pa[zź]dziernik|pa[zź]dziernika|pa[zź]|paz|listopad|listopada|lis|grudzie[nń]|grudnia|gru)\b"
+                    institution = re.sub(months_pattern_short, "", institution, flags=re.IGNORECASE).strip()
+                    # remove trailing punctuation and stray separators
+                    institution = re.sub(r"[\|\-\:\,;]+$", "", institution).strip()
+                    # collapse multiple spaces and strip
+                    institution = re.sub(r"\s+", " ", institution).strip()
 
-        if len(education_sections) > 0:
-            print(f"Found education sections:")
+                dmatch = re.search(r"\b(licencjat|magister|in[żz]ynier|mgr|lic\.|bachelor|master)\b", sb, re.IGNORECASE)
+                if dmatch:
+                    degree = dmatch.group(1).capitalize()
 
-            for section in education_sections:
-                print(section)
+                degree_tokens = [t[0] for t in base_word.searchString(degree)]
+                institution_tokens = [t[0] for t in base_word.searchString(institution)]
+                degree_clean = " ".join(degree_tokens) if degree_tokens else (degree or "UNKNOWN")
+                institution_clean = " ".join(institution_tokens) if institution_tokens else (institution or "UNKNOWN")
 
-            return education_sections
+                # compute sensible start/end dates: prefer earliest year as start,
+                # latest year as end. If only one year is present, set end_date to None
+                # (ongoing or unspecified) to match expected outputs.
+                yrs = [y for (y, m) in months]
+                if yrs:
+                    start_year = min(yrs)
+                    end_year = max(yrs)
+                    # pick month for start if available for that year
+                    start_month = next((m for (y, m) in months if y == start_year and m), 1)
+                    end_month = next((m for (y, m) in reversed(months) if y == end_year and m), 1)
+                    start_date = date(start_year, start_month or 1, 1)
+                    end_date = None if start_year == end_year else date(end_year, end_month or 1, 1)
+                else:
+                    # fallback to any bare years found in the block
+                    ys = self._return_years_in_text(sb)
+                    if ys:
+                        start_year = min(ys)
+                        end_year = max(ys)
+                        start_date = date(start_year, 1, 1)
+                        end_date = None if start_year == end_year else date(end_year, 1, 1)
+                    else:
+                        start_date = date(1900, 1, 1)
+                        end_date = None
+
+                # only include entries that have a plausible institution or degree
+                if (institution_clean and institution_clean != "UNKNOWN") or (degree_clean and degree_clean != "UNKNOWN"):
+                    edu_list.append(schema.Education(
+                        degree=degree_clean or "UNKNOWN",
+                        institution=institution_clean or "UNKNOWN",
+                        start_date=start_date,
+                        end_date=end_date,
+                        field_of_study=field_of_study or "UNKNOWN",
+                    ))
+
+        # Fallback: if pyparsing blocks didn't find education entries, look for
+        # explicit 'Edukacja' (or variants) headings and capture the following
+        # non-empty lines until the next blank line. This handles PDFs where
+        # the extractor didn't produce a contiguous block recognized above.
+        if not edu_list:
+            for m in re.finditer(r"(?mi)^(edukacja|wykształcenie|education)\s*$", text):
+                start = m.end()
+                rest = text[start:]
+                end_idx = rest.find("\n\n")
+                block = rest if end_idx == -1 else rest[:end_idx]
+                lines = [ln.strip() for ln in block.splitlines() if ln.strip()]
+                if not lines:
+                    continue
+                # Expectation: first non-empty line is institution, next may be field, final may be year
+                inst = lines[0]
+                fld = "UNKNOWN"
+                yrs = []
+                for ln in lines[1:4]:
+                    ymatch = re.search(r"\b(19\d\d|20\d\d|2100)\b", ln)
+                    if ymatch:
+                        yrs.append(int(ymatch.group(1)))
+                    k = re.search(r"(kierun\w*)\s+([A-Za-zĄĆĘŁŃÓŚŹŻąćęłńóśźż0-9\s\-:]+)", ln, re.IGNORECASE)
+                    if k:
+                        fld = k.group(0).strip()
+
+                start_date = date(1900, 1, 1)
+                end_date = None
+                if yrs:
+                    start_year = min(yrs)
+                    start_date = date(start_year, 1, 1)
+                    end_date = None if len(yrs) == 1 else date(max(yrs), 1, 1)
+
+                # sanitize institution similar to main flow
+                institution = re.sub(r"\b(19\d\d|20\d\d|2100)\b", "", inst)
+                institution = re.sub(r"\(.*?\)", "", institution).strip()
+                institution = re.sub(r"\b(Edukacja|edukacja|kierun\w*)\b.*$", "", institution, flags=re.IGNORECASE).strip()
+                # remove trailing separators and normalize spacing (handles cases like 'Politechnika X |')
+                institution = re.sub(r"[\|\-\:\,;]+$", "", institution).strip()
+                institution = re.sub(r"\s+", " ", institution).strip()
+
+                edu_list.append(schema.Education(
+                    degree="UNKNOWN",
+                    institution=institution or "UNKNOWN",
+                    start_date=start_date,
+                    end_date=end_date,
+                    field_of_study=fld or "UNKNOWN",
+                ))
+
+        # Deduplicate / merge overlapping education entries by normalized institution + start_date
+        if edu_list:
+            def _norm_inst(s: str) -> str:
+                s = s or ""
+                s = unicodedata.normalize("NFKD", s).encode("ascii", "ignore").decode("ascii").lower()
+                s = re.sub(r"[^a-z0-9 ]+", " ", s)
+                s = re.sub(r"\s+", " ", s).strip()
+                return s
+
+            # First pass: merge by (normalized institution, start_date) as before
+            merged_map: dict = {}
+            for e in edu_list:
+                sdate = None if (not e.start_date or e.start_date == date(1900, 1, 1)) else e.start_date
+                key = (_norm_inst(e.institution), sdate)
+                if key in merged_map:
+                    existing = merged_map[key]
+                    # prefer non-UNKNOWN fields
+                    if existing.degree in (None, "UNKNOWN") and (e.degree and e.degree != "UNKNOWN"):
+                        existing.degree = e.degree
+                    if existing.field_of_study in (None, "UNKNOWN") and (e.field_of_study and e.field_of_study != "UNKNOWN"):
+                        existing.field_of_study = e.field_of_study
+                    if existing.institution in (None, "UNKNOWN") and (e.institution and e.institution != "UNKNOWN"):
+                        existing.institution = e.institution
+                    if (existing.start_date is None or (e.start_date and e.start_date < existing.start_date)):
+                        existing.start_date = e.start_date
+                    if existing.end_date is None and e.end_date is not None:
+                        existing.end_date = e.end_date
+                else:
+                    merged_map[key] = schema.Education(
+                        degree=e.degree,
+                        institution=e.institution,
+                        start_date=e.start_date,
+                        end_date=e.end_date,
+                        field_of_study=e.field_of_study,
+                    )
+
+            # Second pass: try to absorb entries that have UNKNOWN institution but matching field_of_study
+            final_map: dict = {}
+            for key, e in merged_map.items():
+                # use normalized institution as primary key
+                inst_norm = key[0]
+                if inst_norm and inst_norm != "unknown":
+                    final_map[inst_norm] = e
+                else:
+                    # try to merge UNKNOWN institution into any existing final_map entry that
+                    # shares tokens with the field_of_study or with the original institution text.
+                    fld_norm = _norm_inst(e.field_of_study or "")
+                    inst_text_norm = _norm_inst(e.institution or "")
+                    merged_into = None
+                    for exist_key, exist_val in list(final_map.items()):
+                        # if field_of_study tokens overlap or institution substring match, merge
+                        if fld_norm and fld_norm in exist_key:
+                            merged_into = exist_key
+                            break
+                        if inst_text_norm and inst_text_norm and inst_text_norm in exist_key:
+                            merged_into = exist_key
+                            break
+
+                    if merged_into:
+                        existing = final_map[merged_into]
+                        if existing.institution in (None, "UNKNOWN") and e.institution and e.institution != "UNKNOWN":
+                            existing.institution = e.institution
+                        if existing.degree in (None, "UNKNOWN") and e.degree and e.degree != "UNKNOWN":
+                            existing.degree = e.degree
+                        if existing.field_of_study in (None, "UNKNOWN") and e.field_of_study and e.field_of_study != "UNKNOWN":
+                            existing.field_of_study = e.field_of_study
+                    else:
+                        # create a fallback key using field_of_study or a unique placeholder
+                        final_key = fld_norm or inst_text_norm or f"_inst_{len(final_map)}"
+                        final_map[final_key] = e
+
+            merged = list(final_map.values())
+            # Remove UNKNOWN-institution entries when a canonical non-UNKNOWN
+            # entry exists for the same start_date (conservative merge)
+            final_merged = []
+            for e in merged:
+                inst_unknown = (not e.institution) or (e.institution and e.institution.strip().upper() == "UNKNOWN")
+                has_peer = any((other is not e) and (other.start_date == e.start_date) and (other.institution and other.institution.strip().upper() != "UNKNOWN") for other in merged)
+                if inst_unknown and has_peer:
+                    # drop this UNKNOWN institution entry as it's absorbed by peer
+                    continue
+                final_merged.append(e)
+
+            return final_merged if final_merged else None
 
         return None
 
@@ -319,6 +553,7 @@ class Parser:
             (self._extract_name, "personal_info.full_name"),
             (self._extract_overview, "overview"),
             (self._extract_education, "education"),
+            # (self._extract_work_experience, "work_experience"),
         ]
 
         log_content = []
