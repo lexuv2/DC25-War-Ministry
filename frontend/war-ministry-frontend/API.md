@@ -6,6 +6,7 @@ Jeśli chodzi o CV samo w sobie, to może zostać struktura, którą wyodrębni�
 Wtedy `GET /cv` mogłoby zwracać listę tego typu danych:
 - imię i nazwisko kandydata - tekst
 - stanowisko - tekst
+- data wpłynięcia aplikacji - data
 - ocena - jak ma być ranking to pewnie liczba
 - status - tekst
 - ID CV
