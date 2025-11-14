@@ -1,8 +1,8 @@
 import { DataSource } from '@angular/cdk/collections';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
-import { map } from 'rxjs/operators';
-import { Observable, of as observableOf, merge } from 'rxjs';
+import { catchError, map } from 'rxjs/operators';
+import { Observable, of as observableOf, merge, BehaviorSubject, of } from 'rxjs';
 import { CvService } from '../cv/cv.service';
 
 // TODO: Replace this with your own data model type
@@ -24,6 +24,7 @@ export class CvTableDataSource extends DataSource<CvTableItem> {
   data: CvTableItem[] = [];
   paginator: MatPaginator | undefined;
   sort: MatSort | undefined;
+  error$ = new BehaviorSubject<string | null>(null);
 
   constructor(private cvService: CvService) {
     super();
@@ -35,28 +36,39 @@ export class CvTableDataSource extends DataSource<CvTableItem> {
    * @returns A stream of the items to be rendered.
    */
   connect(): Observable<CvTableItem[]> {
-    if (this.paginator && this.sort) {
-      // Combine everything that affects the rendered data into one update
-      // stream for the data-table to consume.
-      return merge(this.cvService.getCvList().pipe(
-        map(items => {
-          this.data = items;
-          return items;
-        })
-      ), this.paginator.page, this.sort.sortChange)
-        .pipe(map(() => {
-          return this.getPagedData(this.getSortedData([...this.data ]));
-        }));
-    } else {
+    if (!this.paginator || !this.sort) {
       throw Error('Please set the paginator and sort on the data source before connecting.');
     }
+
+    // Combine everything that affects the rendered data into one update
+    // stream for the data-table to consume.
+    return merge(
+      this.cvService.getCvList().pipe(
+        map(items => {
+          this.error$.next(null);
+          this.data = items;
+          return items;
+        }),
+        catchError(() => {
+          this.error$.next('Błąd pobierania danych, spróbuj ponownie później.');
+          this.data = [];
+          return of([]);
+        })
+      ),
+      this.paginator.page,
+      this.sort.sortChange
+    ).pipe(
+      map(() => this.getPagedData(this.getSortedData([...this.data])))
+    );
   }
 
   /**
    *  Called when the table is being destroyed. Use this function, to clean up
    * any open connections or free any held resources that were set up during connect.
    */
-  disconnect(): void {}
+  disconnect(): void {
+    this.error$.complete();
+  }
 
   /**
    * Paginate the data (client-side). If you're using server-side pagination,
