@@ -61,6 +61,7 @@ def test_full_cv_init() -> None:
 
     cv = schema.CVParserSchema(
         personal_info=personal_info,
+        overview="",
         education=education,
         work_experience=work_experience,
         skills=skills,
