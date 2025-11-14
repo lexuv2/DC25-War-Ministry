@@ -50,7 +50,7 @@ export class CvTableDataSource extends DataSource<CvTableItem> {
           return items;
         }),
         catchError(() => {
-          this.error$.next('Błąd pobierania danych, spróbuj ponownie później.');
+          this.error$.next('Data loading error, try again later.');
           this.data = [];
           return of([]);
         })
