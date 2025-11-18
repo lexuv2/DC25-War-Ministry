@@ -42,7 +42,7 @@
                 "degree": "UNKNOWN",
                 "institution": "Politechnika Gdańska",
                 "start_date": "2022-01-01",
-                "end_date": "2025-01-01",
+                "end_date": "2025-12-31",
                 "field_of_study": "kiernunek Informatyka"
             }
         ],
@@ -173,7 +173,7 @@
                 "degree": "UNKNOWN",
                 "institution": "Politechnika Gdańska",
                 "start_date": "2022-01-01",
-                "end_date": "2025-01-01",
+                "end_date": "2025-12-31",
                 "field_of_study": "Kierunek Informatyka"
             }
         ],
@@ -258,7 +258,7 @@
                 "degree": "Magister",
                 "institution": "Politechnika Wajchowa, Wydział Mechaniki Praktycznej",
                 "start_date": "2005-01-01",
-                "end_date": "2010-01-01",
+                "end_date": "2010-12-31",
                 "field_of_study": "Inżynierii Mechanicznej"
             }
         ],
