@@ -163,6 +163,51 @@ class Parser:
             contact=contact,
         )
 
+        wajcha_required = schema.WajchaRequired(
+            has_higher_education=False,
+            ten_years_experience=False,
+            no_asking=False,
+            color_knowledge=False,
+        )
+
+        wajcha_optional = schema.WajchaOptional(
+            high_soft_skills=False,
+            dead_lift_150kg=False,
+            forklift=False,
+            coffee_making=False,
+        )
+
+        wajcha_keywords = schema.WajchaKeywords(
+            required=wajcha_required,
+            optional=wajcha_optional,
+        )
+
+        zmechol_required = schema.ZmecholRequired(
+            north_south_east_west=False,
+            fast_run=False,
+            push_ups=False,
+            kindergarten_graduate=False,
+        )
+
+        zmechol_optional = schema.ZmecholOptional(
+            driving_licence=False,
+            reading=False,
+            unpunishability=False,
+            grade_school_graduate=False,
+            multiplication_table_knowledge=False,
+        )
+
+        zmechol_keywords = schema.ZmecholKeywords(
+            required=zmechol_required,
+            optional=zmechol_optional,
+        )
+
+        keywords = schema.Keywords(
+            wajcha_keywords=wajcha_keywords,
+            zmechol_keywords=zmechol_keywords,
+        )
+
+
         return schema.CVParserSchema(
             personal_info=personal_info,
             overview="",
@@ -172,6 +217,7 @@ class Parser:
             certifications=[],
             languages=[],
             military_experience=[],
+            keywords=keywords,
         )
 
     def _extract_email(self, text: str) -> Optional[str]:
@@ -519,6 +565,10 @@ class Parser:
             return final_merged if final_merged else None
 
         return None
+    
+    def _extract_keywords(self, text: str) -> Optional[schema.Keywords]:
+        # Placeholder
+        return self.create_mock().keywords
 
     def _apply_extractors(
         self, cv: Any, text: str, extractors: list[tuple[Any, str]]
@@ -554,17 +604,15 @@ class Parser:
             (self._extract_overview, "overview"),
             (self._extract_education, "education"),
             # (self._extract_work_experience, "work_experience"),
+            (self._extract_keywords, "keywords"),
         ]
 
+        content = "\n".join([page.get_text(sort=True) for _, page in enumerate(doc, start=1)])
         log_content = []
-
-        for i, page in enumerate(doc, start=1):
-
-            content = page.get_text(sort=True)
-            normalized = self._normalize_whitespace(content)
-            normalized = self._remove_unwanted_unicode(normalized)
-            log_content.append(normalized)
-            self._apply_extractors(cv, normalized, extractors)
+        normalized = self._normalize_whitespace(content)
+        normalized = self._remove_unwanted_unicode(normalized)
+        log_content.append(normalized)
+        self._apply_extractors(cv, normalized, extractors)
 
         if enable_log:
             with open(
