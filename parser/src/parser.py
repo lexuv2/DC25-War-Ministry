@@ -179,15 +179,43 @@ class Parser:
                 "education",
                 "nauczanie",
                 "wykształcenie",
+                "kluczowe umiejętności",
                 "umiejętności",
                 "umiejetnosci",
                 "certyfikat",
+                "certyfikaty",
                 "języki",
                 "jezyki",
                 "doświadczenie wojskowe",
                 "doswiadczenie wojskowe",
             ]
-            section_pattern = re.compile(r"(" + "|".join(section_headings) + r")", re.IGNORECASE)
+            section_pattern = re.compile(r"(?mi)^(?:" + "|".join(section_headings) + r")[:\-\s \wąćęłńóśźżĄĆĘŁŃÓŚŹŻ]*$", re.IGNORECASE)
+            sec_match = section_pattern.search(text_after)
+            if sec_match:
+                end_idx = sec_match.start()
+                return text_after[:end_idx].strip()
+            else:
+                return text_after.strip()
+            
+    def _education_str_extraction(self, text: str) -> str:
+        keywords_pattern = re.compile(r"(?:\n(Moj(?:e|a) )?)\b(edukacja|nauczanie|education|wykształcenie):?\b", re.IGNORECASE)
+        for match in keywords_pattern.finditer(text):
+            start_idx = match.end()
+            text_after = text[start_idx:]
+            # cut off at next section heading if any
+            section_headings = [
+                "wykształcenie",
+                "kluczowe umiejętności",
+                "umiejętności",
+                "umiejetnosci",
+                "certyfikat",
+                "certyfikaty",
+                "języki",
+                "jezyki",
+                "doświadczenie",
+                "doswiadczenie",
+            ]
+            section_pattern = re.compile(r"(?mi)^(?:" + "|".join(section_headings) + r")[:\-\s \wąćęłńóśźżĄĆĘŁŃÓŚŹŻ]*$", re.IGNORECASE)
             sec_match = section_pattern.search(text_after)
             if sec_match:
                 end_idx = sec_match.start()
@@ -709,12 +737,12 @@ class Parser:
     ) -> schema.CVParserSchema:
 
         file_basename = os.path.basename(input)
-        if input.lower().endswith(".docx"):
+        if str(input).lower().endswith(".docx"):
             input = self._preprocess_docx(input)
 
         doc = fitz.open(input)
 
-        if input.lower().endswith(".docx"):
+        if str(input).lower().endswith(".docx"):
             os.remove(input)
 
         cv = self.create_mock()
