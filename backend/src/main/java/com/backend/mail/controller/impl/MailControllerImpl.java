@@ -1,7 +1,7 @@
 package com.backend.mail.controller.impl;
 
 import com.backend.mail.controller.api.MailController;
-import com.backend.mail.dto.PutMailRequest;
+import com.backend.Gmail.PutMailRequest;
 import com.backend.mail.service.api.MailService;
 import com.backend.shared.ApplicationMessage;
 import com.backend.shared.ApplicationResponseHandler;

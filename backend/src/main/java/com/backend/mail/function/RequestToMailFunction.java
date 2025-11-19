@@ -1,6 +1,6 @@
 package com.backend.mail.function;
 
-import com.backend.mail.dto.PutMailRequest;
+import com.backend.Gmail.PutMailRequest;
 import com.backend.mail.entity.Mail;
 import org.springframework.stereotype.Component;
 
