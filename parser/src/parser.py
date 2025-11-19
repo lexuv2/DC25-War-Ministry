@@ -7,7 +7,7 @@ from src import schema
 import fitz
 import os
 from pyparsing import Word, OneOrMore, SkipTo, Combine, pyparsing_unicode as ppu
-
+import calendar
 
 class Parser:
     def __init__(self) -> None:
@@ -15,6 +15,25 @@ class Parser:
         self.base_alphas = ppu.Latin1.alphas + ppu.LatinA.alphas + ppu.LatinB.alphas
         self.name_alphas = self.base_alphas + "-"
         self.alphanum_alphas = self.base_alphas + ppu.Latin1.nums + ppu.LatinA.nums + ppu.LatinB.nums
+
+    def _preprocess_docx(self, loc: str) -> str:
+        """
+        Remove mc:Fallback elements from document.xml inside a DOCX file
+        """
+        import zipfile
+        with zipfile.ZipFile(loc, 'r') as docx:
+            xml_content = docx.read('word/document.xml').decode('utf-8')
+            # Remove mc:Fallback elements
+            cleaned_xml = re.sub(r'<mc:Fallback>.*?</mc:Fallback>', '', xml_content, flags=re.DOTALL)
+            # Write back the cleaned XML to a new DOCX file
+            temp_loc = loc + '_cleaned.docx'
+            with zipfile.ZipFile(temp_loc, 'w') as cleaned_docx:
+                for item in docx.infolist():
+                    if item.filename == 'word/document.xml':
+                        cleaned_docx.writestr(item, cleaned_xml)
+                    else:
+                        cleaned_docx.writestr(item, docx.read(item.filename))
+        return temp_loc
 
     def _normalize_whitespace(self, text: str) -> str:
         """
@@ -466,7 +485,7 @@ class Parser:
                     start_month = next((m for (y, m) in months if y == start_year and m), 1)
                     end_month = next((m for (y, m) in reversed(months) if y == end_year and m), 1)
                     start_date = date(start_year, start_month or 1, 1)
-                    end_date = None if start_year == end_year else date(end_year, end_month or 12, 31)
+                    end_date = None if start_year == end_year else date(end_year, end_month or 12, calendar.monthrange(end_year, end_month or 12)[1])
                 else:
                     # fallback to any bare years found in the block
                     ys = self._return_years_in_text(sb)
@@ -690,8 +709,14 @@ class Parser:
     ) -> schema.CVParserSchema:
 
         file_basename = os.path.basename(input)
+        if input.lower().endswith(".docx"):
+            input = self._preprocess_docx(input)
 
         doc = fitz.open(input)
+
+        if input.lower().endswith(".docx"):
+            os.remove(input)
+
         cv = self.create_mock()
 
         extractors = [
