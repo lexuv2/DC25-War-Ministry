@@ -77,6 +77,50 @@ public class GmailService {
                 .authorize("user");
     }
 
+    public void refreshAllEmails() throws IOException, GeneralSecurityException {
+        int numberOfEmails = getInboxMessageCount();
+
+        Gmail service = getGmailService();
+
+        // Get list of messages (ordered newest first)
+        ListMessagesResponse response = service.users().messages()
+                .list("me")
+                .setLabelIds(List.of("INBOX"))
+                .setMaxResults((long) (numberOfEmails + 1))
+                .execute();
+
+        List<Message> messages = response.getMessages();
+        if (messages == null || messages.size() <= numberOfEmails) {
+            throw new IllegalArgumentException("more mails than mails in inbox");
+        }
+
+        for (int index = 0; index < numberOfEmails; index++) {
+            String messageId = messages.get(index).getId();
+
+            //TODO CHECK IF MAIL IN REPO
+
+            Message message = service.users().messages().get("me", messageId).setFormat("full").execute();
+
+            // Extract basic info
+            MessagePart payload = message.getPayload();
+
+            List<Map<String, String>> attachments = new ArrayList<>();
+
+            extractAttachments(service, "me", message.getPayload(), messageId, attachments);
+
+            // Add attachment entries (base64-encoded)
+            for (int i = 0; i < attachments.size(); i++) {
+                Map<String, String> entries = attachments.get(i);
+                for (Map.Entry<String, String> entry : entries.entrySet()) {
+                    //TODO PARSE AND SAVE CANDIDATE DATA
+                    uploadAttachmentToDrive(entry);
+                }
+            }
+
+
+        }
+    }
+
     public int getInboxMessageCount() throws IOException, GeneralSecurityException {
         Gmail service = getGmailService();
         ListMessagesResponse response = service.users().messages().list("me").setLabelIds(List.of("INBOX")).execute();
@@ -122,6 +166,8 @@ public class GmailService {
         String from = getHeader(headers, "From");
         String date = getHeader(headers, "Date");
 
+        // TODO CHECK IF MAIL IN REPO
+
         String snippet = message.getSnippet();
         List<Map<String, String>> attachments = new ArrayList<>();
 
@@ -143,6 +189,9 @@ public class GmailService {
                 result.put("attachment_" + (i + 1) + "_data", entry.getValue());
             }
         }
+
+        //TODO PARSE AND SAVE CANDIDATE DATA
+
 
         return result;
     }
