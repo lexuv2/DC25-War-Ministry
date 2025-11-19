@@ -1,8 +1,9 @@
 import { DataSource } from '@angular/cdk/collections';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
-import { map } from 'rxjs/operators';
-import { Observable, of as observableOf, merge } from 'rxjs';
+import { catchError, map } from 'rxjs/operators';
+import { Observable, of as observableOf, merge, BehaviorSubject, of } from 'rxjs';
+import { CvService } from '../cv/cv.service';
 
 // TODO: Replace this with your own data model type
 export interface CvTableItem {
@@ -14,41 +15,18 @@ export interface CvTableItem {
   status: string;
 }
 
-// TODO: replace this with real data from your application
-const EXAMPLE_DATA: CvTableItem[] = [
-  {id: 1, name: 'Malwina Kosewska', date_received: new Date(), position_applied: 'Operator wajchy', score: Math.floor(Math.random() * 1000), status: 'unknown'},
-  {id: 2, name: 'Kamil Nietupski', date_received: new Date(), position_applied: 'Żołnierz piechoty zmechanizowanej', score: Math.floor(Math.random() * 1000), status: 'unknown'},
-  {id: 3, name: 'Tobiasz Bączyński', date_received: new Date(), position_applied: 'Operator wajchy', score: Math.floor(Math.random() * 1000), status: 'unknown'},
-  {id: 4, name: 'Karol Dobrzycki', date_received: new Date(), position_applied: 'Operator wajchy', score: Math.floor(Math.random() * 1000), status: 'unknown'},
-  {id: 5, name: 'Marcel Ziętal', date_received: new Date(), position_applied: 'Żołnierz piechoty zmechanizowanej', score: Math.floor(Math.random() * 1000), status: 'unknown'},
-  {id: 6, name: 'Bronisław Laskus', date_received: new Date(), position_applied: 'Operator wajchy', score: Math.floor(Math.random() * 1000), status: 'unknown'},
-  {id: 7, name: 'Sylwia Herdzik', date_received: new Date(), position_applied: 'Żołnierz piechoty zmechanizowanej', score: Math.floor(Math.random() * 1000), status: 'unknown'},
-  {id: 8, name: 'Apolonia Rembowska', date_received: new Date(), position_applied: 'Operator wajchy', score: Math.floor(Math.random() * 1000), status: 'unknown'},
-  {id: 9, name: 'Mirosław Kyc', date_received: new Date(), position_applied: 'Żołnierz piechoty zmechanizowanej', score: Math.floor(Math.random() * 1000), status: 'unknown'},
-  {id: 10, name: 'Teodor Krysiak', date_received: new Date(), position_applied: 'Operator wajchy', score: Math.floor(Math.random() * 1000), status: 'unknown'},
-  {id: 11, name: 'Karina Wcisło', date_received: new Date(), position_applied: 'Operator wajchy', score: Math.floor(Math.random() * 1000), status: 'unknown'},
-  {id: 12, name: 'Zdzisław Mączkowski', date_received: new Date(), position_applied: 'Żołnierz piechoty zmechanizowanej', score: Math.floor(Math.random() * 1000), status: 'unknown'},
-  {id: 13, name: 'Wiktoria Wieczorkiewicz', date_received: new Date(), position_applied: 'Operator wajchy', score: Math.floor(Math.random() * 1000), status: 'unknown'},
-  {id: 14, name: 'Rudolf Grenda', date_received: new Date(), position_applied: 'Operator wajchy', score: Math.floor(Math.random() * 1000), status: 'unknown'},
-  {id: 15, name: 'Eugeniusz Rychcik', date_received: new Date(), position_applied: 'Żołnierz piechoty zmechanizowanej', score: Math.floor(Math.random() * 1000), status: 'unknown'},
-  {id: 16, name: 'Eryk Polakowski', date_received: new Date(), position_applied: 'Żołnierz piechoty zmechanizowanej', score: Math.floor(Math.random() * 1000), status: 'unknown'},
-  {id: 17, name: 'Wiesław Benedyk', date_received: new Date(), position_applied: 'Operator wajchy', score: Math.floor(Math.random() * 1000), status: 'unknown'},
-  {id: 18, name: 'Antoni Szelest', date_received: new Date(), position_applied: 'Żołnierz piechoty zmechanizowanej', score: Math.floor(Math.random() * 1000), status: 'unknown'},
-  {id: 19, name: 'Magda Pacyga', date_received: new Date(), position_applied: 'Operator wajchy', score: Math.floor(Math.random() * 1000), status: 'unknown'},
-  {id: 20, name: 'Daria Średnicka', date_received: new Date(), position_applied: 'Żołnierz piechoty zmechanizowanej', score: Math.floor(Math.random() * 1000), status: 'unknown'},
-];
-
 /**
  * Data source for the CvTable view. This class should
  * encapsulate all logic for fetching and manipulating the displayed data
  * (including sorting, pagination, and filtering).
  */
 export class CvTableDataSource extends DataSource<CvTableItem> {
-  data: CvTableItem[] = EXAMPLE_DATA;
+  data: CvTableItem[] = [];
   paginator: MatPaginator | undefined;
   sort: MatSort | undefined;
+  error$ = new BehaviorSubject<string | null>(null);
 
-  constructor() {
+  constructor(private cvService: CvService) {
     super();
   }
 
@@ -58,23 +36,39 @@ export class CvTableDataSource extends DataSource<CvTableItem> {
    * @returns A stream of the items to be rendered.
    */
   connect(): Observable<CvTableItem[]> {
-    if (this.paginator && this.sort) {
-      // Combine everything that affects the rendered data into one update
-      // stream for the data-table to consume.
-      return merge(observableOf(this.data), this.paginator.page, this.sort.sortChange)
-        .pipe(map(() => {
-          return this.getPagedData(this.getSortedData([...this.data ]));
-        }));
-    } else {
+    if (!this.paginator || !this.sort) {
       throw Error('Please set the paginator and sort on the data source before connecting.');
     }
+
+    // Combine everything that affects the rendered data into one update
+    // stream for the data-table to consume.
+    return merge(
+      this.cvService.getCvList().pipe(
+        map(items => {
+          this.error$.next(null);
+          this.data = items;
+          return items;
+        }),
+        catchError(() => {
+          this.error$.next('Błąd pobierania danych, spróbuj ponownie później.');
+          this.data = [];
+          return of([]);
+        })
+      ),
+      this.paginator.page,
+      this.sort.sortChange
+    ).pipe(
+      map(() => this.getPagedData(this.getSortedData([...this.data])))
+    );
   }
 
   /**
    *  Called when the table is being destroyed. Use this function, to clean up
    * any open connections or free any held resources that were set up during connect.
    */
-  disconnect(): void {}
+  disconnect(): void {
+    this.error$.complete();
+  }
 
   /**
    * Paginate the data (client-side). If you're using server-side pagination,

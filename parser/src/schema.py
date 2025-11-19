@@ -71,11 +71,50 @@ class MilitaryExperience(BaseModel):
     duties: List[str]
 
 
+class WajchaRequired(BaseModel):
+    has_higher_education: bool = False
+    ten_years_experience: bool = False
+    no_asking: bool = False
+    color_knowledge: bool = False
+
+class WajchaOptional(BaseModel):
+    high_soft_skills: bool = False
+    dead_lift_150kg: bool = False
+    forklift: bool = False
+    coffee_making: bool = False
+
+class WajchaKeywords(BaseModel):
+    required: WajchaRequired
+    optional: WajchaOptional
+
+class ZmecholRequired(BaseModel):
+    north_south_east_west: bool = False
+    fast_run: bool = False
+    push_ups: bool = False
+    kindergarten_graduate: bool = False
+
+class ZmecholOptional(BaseModel):
+    driving_licence: bool = False
+    reading: bool = False
+    unpunishability: bool = False
+    grade_school_graduate: bool = False
+    multiplication_table_knowledge: bool = False
+
+class ZmecholKeywords(BaseModel):
+    required: ZmecholRequired
+    optional: ZmecholOptional
+
+class Keywords(BaseModel):
+    wajcha_keywords: WajchaKeywords
+    zmechol_keywords: ZmecholKeywords
+
 class CVParserSchema(BaseModel):
     personal_info: PersonalInfo
+    overview: str
     education: List[Education]
     work_experience: List[WorkExperience]
     skills: List[str]
     certifications: Optional[List[Certification]] = None
     languages: List[Language]
     military_experience: Optional[List[MilitaryExperience]] = None
+    keywords: Keywords
