@@ -7,7 +7,7 @@ from src import schema
 import fitz
 import os
 from pyparsing import Word, OneOrMore, SkipTo, Combine, pyparsing_unicode as ppu
-import calendar
+
 
 class Parser:
     def __init__(self) -> None:
@@ -15,25 +15,6 @@ class Parser:
         self.base_alphas = ppu.Latin1.alphas + ppu.LatinA.alphas + ppu.LatinB.alphas
         self.name_alphas = self.base_alphas + "-"
         self.alphanum_alphas = self.base_alphas + ppu.Latin1.nums + ppu.LatinA.nums + ppu.LatinB.nums
-
-    def _preprocess_docx(self, loc: str) -> str:
-        """
-        Remove mc:Fallback elements from document.xml inside a DOCX file
-        """
-        import zipfile
-        with zipfile.ZipFile(loc, 'r') as docx:
-            xml_content = docx.read('word/document.xml').decode('utf-8')
-            # Remove mc:Fallback elements
-            cleaned_xml = re.sub(r'<mc:Fallback>.*?</mc:Fallback>', '', xml_content, flags=re.DOTALL)
-            # Write back the cleaned XML to a new DOCX file
-            temp_loc = loc + '_cleaned.docx'
-            with zipfile.ZipFile(temp_loc, 'w') as cleaned_docx:
-                for item in docx.infolist():
-                    if item.filename == 'word/document.xml':
-                        cleaned_docx.writestr(item, cleaned_xml)
-                    else:
-                        cleaned_docx.writestr(item, docx.read(item.filename))
-        return temp_loc
 
     def _normalize_whitespace(self, text: str) -> str:
         """
@@ -100,7 +81,7 @@ class Parser:
     
     def _return_years_in_text(self, text: str) -> List[int]:
         """Return list of years (numbers between 1900 and 2100) found in text."""
-        years = re.findall(r"(19\d\d|20\d\d|2100)", text)
+        years = re.findall(r"\b(19\d\d|20\d\d|2100)\b", text)
         return [int(year) for year in years]
 
     def _parse_month_years_in_text(self, text: str) -> List[Tuple[int, Optional[int]]]:
@@ -166,61 +147,6 @@ class Parser:
         ]
         pattern = re.compile(r"(" + "|".join(keywords) + r")", re.IGNORECASE)
         return pattern.search(text) is not None
-    
-    def _experience_str_extraction(self, text: str) -> str:
-        # find line starting with experience keywords and return anything before Edukacja, Umiejętności etc.
-        keywords_pattern = re.compile(r"(?:\n(Moje )?)\b(do(ś|s)wia(t|d)czenie):?\b", re.IGNORECASE)
-        for match in keywords_pattern.finditer(text):
-            start_idx = match.end()
-            text_after = text[start_idx:]
-            # cut off at next section heading if any
-            section_headings = [
-                "edukacja",
-                "education",
-                "nauczanie",
-                "wykształcenie",
-                "umiejętności",
-                "umiejetnosci",
-                "certyfikat",
-                "języki",
-                "jezyki",
-                "doświadczenie wojskowe",
-                "doswiadczenie wojskowe",
-            ]
-            section_pattern = re.compile(r"(" + "|".join(section_headings) + r")", re.IGNORECASE)
-            sec_match = section_pattern.search(text_after)
-            if sec_match:
-                end_idx = sec_match.start()
-                return text_after[:end_idx].strip()
-            else:
-                return text_after.strip()
-            
-    def _calculate_years_from_txt(self, text: str) -> int:
-        years = sorted(self._return_years_in_text(text))
-        first_year = years[0] if years else None
-        if first_year is None:
-            return 0
-        last_year = years[-1] if years else None
-        if last_year is None:
-            return 0
-        
-        # try to find if currently working
-        now_keywords = ["teraz", "obecnie", "aktualnie", "dziś", "dzis"]
-        now_pattern = re.compile(r"(" + "|".join(now_keywords) + r")", re.IGNORECASE)
-        if now_pattern.search(text):
-            last_year = date.today().year
-        total_years = last_year - first_year + 1
-
-        return total_years
-    
-    def _calculate_dead_lift_from_txt(self, text: str) -> bool:
-        # find martwy ciąg and numbers
-        dead_lift_pattern = re.compile(r"(\d+)(?: ?kg (?:w )?martwym? ci(?:ą|a)gu?)", re.IGNORECASE)
-        match = dead_lift_pattern.search(text)
-        if match:
-            weight = int(match.group(1))
-            return weight >= 150
-        return False
 
     def create_mock(self) -> schema.CVParserSchema:
 
@@ -237,51 +163,6 @@ class Parser:
             contact=contact,
         )
 
-        wajcha_required = schema.WajchaRequired(
-            has_higher_education=False,
-            ten_years_experience=False,
-            no_asking=False,
-            color_knowledge=False,
-        )
-
-        wajcha_optional = schema.WajchaOptional(
-            high_soft_skills=False,
-            dead_lift_150kg=False,
-            forklift=False,
-            coffee_making=False,
-        )
-
-        wajcha_keywords = schema.WajchaKeywords(
-            required=wajcha_required,
-            optional=wajcha_optional,
-        )
-
-        zmechol_required = schema.ZmecholRequired(
-            north_south_east_west=False,
-            fast_run=False,
-            push_ups=False,
-            kindergarten_graduate=False,
-        )
-
-        zmechol_optional = schema.ZmecholOptional(
-            driving_licence=False,
-            reading=False,
-            unpunishability=False,
-            grade_school_graduate=False,
-            multiplication_table_knowledge=False,
-        )
-
-        zmechol_keywords = schema.ZmecholKeywords(
-            required=zmechol_required,
-            optional=zmechol_optional,
-        )
-
-        keywords = schema.Keywords(
-            wajcha_keywords=wajcha_keywords,
-            zmechol_keywords=zmechol_keywords,
-        )
-
-
         return schema.CVParserSchema(
             personal_info=personal_info,
             overview="",
@@ -291,7 +172,6 @@ class Parser:
             certifications=[],
             languages=[],
             military_experience=[],
-            keywords=keywords,
         )
 
     def _extract_email(self, text: str) -> Optional[str]:
@@ -400,19 +280,16 @@ class Parser:
             print(f"Found about sections:")
 
             for section in valid_sections:
-                print(section)
+                print(valid_sections)
 
             return valid_sections[0]
 
         return None
 
     def _extract_education(self, text: str) -> Optional[List[schema.Education]]:
-        # Split text into paragraphs separated by blank lines, including the last paragraph
-        # even if the text does not end with a trailing double newline.
-        blocks = [b.strip() for b in re.split(r"(?:\r?\n){2,}", text.strip()) if b.strip()]
-        # section_body = SkipTo("\n\n", include=False)
-        # section_parser = Combine(section_body + "\n\n")
-        # blocks = [res[0].strip() for res, _, _ in section_parser.scanString(text)]
+        section_body = SkipTo("\n\n", include=False)
+        section_parser = Combine(section_body + "\n\n")
+        blocks = [res[0].strip() for res, _, _ in section_parser.scanString(text)]
 
         base_word = Word(self.alphanum_alphas)
         edu_list: List[schema.Education] = []
@@ -485,7 +362,7 @@ class Parser:
                     start_month = next((m for (y, m) in months if y == start_year and m), 1)
                     end_month = next((m for (y, m) in reversed(months) if y == end_year and m), 1)
                     start_date = date(start_year, start_month or 1, 1)
-                    end_date = None if start_year == end_year else date(end_year, end_month or 12, calendar.monthrange(end_year, end_month or 12)[1])
+                    end_date = None if start_year == end_year else date(end_year, end_month or 1, 1)
                 else:
                     # fallback to any bare years found in the block
                     ys = self._return_years_in_text(sb)
@@ -493,7 +370,7 @@ class Parser:
                         start_year = min(ys)
                         end_year = max(ys)
                         start_date = date(start_year, 1, 1)
-                        end_date = None if start_year == end_year else date(end_year, 12, 31)
+                        end_date = None if start_year == end_year else date(end_year, 1, 1)
                     else:
                         start_date = date(1900, 1, 1)
                         end_date = None
@@ -538,7 +415,7 @@ class Parser:
                 if yrs:
                     start_year = min(yrs)
                     start_date = date(start_year, 1, 1)
-                    end_date = None if len(yrs) == 1 else date(max(yrs), 12, 31)
+                    end_date = None if len(yrs) == 1 else date(max(yrs), 1, 1)
 
                 # sanitize institution similar to main flow
                 institution = re.sub(r"\b(19\d\d|20\d\d|2100)\b", "", inst)
@@ -642,49 +519,6 @@ class Parser:
             return final_merged if final_merged else None
 
         return None
-    
-    def _extract_keywords(self, text: str) -> Optional[schema.Keywords]:
-        # Placeholder
-        # return self.create_mock().keywords
-
-        # array with keywords together with regex patterns to search for
-        keywords_patterns = {
-            # Wajcha Required
-            "has_higher_education": r"\b(wyższe wykształcenie|wyzsze wyksztalcenie|wykształcenie wyższe|wyksztalcenie wyzsze|studia magisterskie|studia inżynierskie|studia inzynierskie|licencjat|magister|inżynier|inzynier|mgr|lic\.|politechnika|politechniki|politechnikę|uniwersytet|akademia|kolegium)\b",
-            "ten_years_experience": r"\b(10 lat doświadczenia|10 lat doswiadczenia|10-letnim doświadczeniem|10-letnie doświadczenie)\b", # additional naive year parsing -> TODO
-            "no_asking": r"\b(nie pytam|nie zadaj(ę|e) pytań|nie zadaję głupich pytań|niezadawanie pytań|niezadawanie głupich pytań|bez zadawania pytań|nie zadając( zbędnych)? pytań)\b",
-            "color_knowledge": r"\b(znajomość kolorów|znajomosc kolorow|rozróżnianie kolorów|rozroznianie kolorow|znam (wszystkie )?kolory|rozróżniam kolory)\b",
-            # Wajcha Optional
-            "high_soft_skills": r"\b(wysokie umiejętności miękkie|wysokie umiejetnosci miekkie)\b",
-            "dead_lift_150kg": r"\b(martwy ciąg 150kg|martwy ciag 150kg|150kg w martwym ciągu)\b", # do przeliczenia ze skillsów -> TODO
-            "forklift": r"\b(wózek widłowy|wozek widlowy|wózku widłowym|wozku widlowym)\b",
-            "coffee_making": r"\b(kawę|kawy)\b",
-            # Zmechol Required
-            "north_south_east_west": r"\b(rozróżnianie kierunków|rozróżniam kierunki|rozróżnianie stron świata|rozróżniam strony świata|orientacja w terenie|(dobrze )?orientuję (się )?w terenie)\b",
-            "fast_run": r"\b(bieg(u)?|biegam|bieganie|biegi|biegać)\b",
-            "push_ups": r"\b(pompki|push[- ]?ups?|robienie pompek|robię pompki)\b",
-            "kindergarten_graduate": r"\b(przedszkole|przedszkola|przedszkolu|szkoła|szkołę|szkoły|szkole|gimnazjum|liceum|technikum|politechnika|politechniki|politechnikę|uniwersytet|akademia|kolegium)\b",
-            # Zmechol Optional
-            "driving_licence": r"\b(prawo jazdy|posiadacz prawa jazdy)\b",
-            "reading": r"\b(czytanie|czytania|czytać|czytam)\b",
-            "unpunishability": r"\b(niekaralność|niekaralnosc)\b",
-            "grade_school_graduate": r"\b(szkoła|szkoły|szkole|szkołę|gimnazjum|liceum|technikum|politechnika|politechniki|politechnikę|uniwersytet|akademia|kolegium)\b",
-            "multiplication_table_knowledge": r"\b(tabliczka mnożenia|tabliczka mnozenia|tabliczkę mnożenia)\b",
-        }
-        keywords = self.create_mock().keywords
-        cleaned_text = " ".join([line.strip() for line in self._normalize_whitespace(text).split("\n")])
-        for attr, pattern in keywords_patterns.items():
-            if re.search(pattern, cleaned_text, re.IGNORECASE) or (attr == "ten_years_experience" and self._calculate_years_from_txt(self._experience_str_extraction(self._normalize_whitespace(text))) >= 10) or (attr == "dead_lift_150kg" and self._calculate_dead_lift_from_txt(self._normalize_whitespace(text))):
-                print(f"Keyword matched: {attr}")
-                for sub_attr in ['wajcha_keywords', 'zmechol_keywords']:
-                    sub_obj = getattr(keywords, sub_attr)
-                    for sub_sub_attr in ['required', 'optional']:
-                        sub_sub_obj = getattr(sub_obj, sub_sub_attr)
-
-                        if hasattr(sub_sub_obj, attr):
-                            setattr(sub_sub_obj, attr, True)
-                            break
-        return keywords
 
     def _apply_extractors(
         self, cv: Any, text: str, extractors: list[tuple[Any, str]]
@@ -709,14 +543,8 @@ class Parser:
     ) -> schema.CVParserSchema:
 
         file_basename = os.path.basename(input)
-        if input.lower().endswith(".docx"):
-            input = self._preprocess_docx(input)
 
         doc = fitz.open(input)
-
-        if input.lower().endswith(".docx"):
-            os.remove(input)
-
         cv = self.create_mock()
 
         extractors = [
@@ -726,15 +554,17 @@ class Parser:
             (self._extract_overview, "overview"),
             (self._extract_education, "education"),
             # (self._extract_work_experience, "work_experience"),
-            (self._extract_keywords, "keywords"),
         ]
 
-        content = "\n".join([page.get_text(sort=True) for _, page in enumerate(doc, start=1)])
         log_content = []
-        normalized = self._normalize_whitespace(content)
-        normalized = self._remove_unwanted_unicode(normalized)
-        log_content.append(normalized)
-        self._apply_extractors(cv, normalized, extractors)
+
+        for i, page in enumerate(doc, start=1):
+
+            content = page.get_text(sort=True)
+            normalized = self._normalize_whitespace(content)
+            normalized = self._remove_unwanted_unicode(normalized)
+            log_content.append(normalized)
+            self._apply_extractors(cv, normalized, extractors)
 
         if enable_log:
             with open(
