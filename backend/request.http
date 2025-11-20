@@ -69,3 +69,6 @@ Authorization: Basic a2V2aW46dXNlcnVzZXI=
   "meetingDetails": "Monday, October 27th, at 1:15 pm",
   "position": "Piechota zmechanizowana"
 }
+
+### Get Candidates
+GET http://localhost:8080/cv

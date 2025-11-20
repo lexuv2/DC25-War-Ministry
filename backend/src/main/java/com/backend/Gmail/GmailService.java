@@ -24,6 +24,7 @@ import com.google.api.services.gmail.model.*;
 import com.google.api.services.gmail.model.Message;
 import org.apache.commons.codec.binary.Base64;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.context.ConfigurationPropertiesAutoConfiguration;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -52,9 +53,10 @@ public class GmailService {
 
     private final GmailRepository gmailRepository;
     private final CVService cvService;
+    private final ConfigurationPropertiesAutoConfiguration configurationPropertiesAutoConfiguration;
 
     // parserowe rzeczy
-    String projectRoot = new java.io.File(System.getProperty("user.dir")).getParent();
+    String projectRoot = new java.io.File(System.getProperty("user.dir")).getPath();
     java.io.File parserDir = new java.io.File(projectRoot, "parser");
     // Ścieżka do Pythona w wirtualnym środowisku
     String pythonExecutable = new java.io.File(parserDir, "venv/Scripts/python").getAbsolutePath();
@@ -62,9 +64,10 @@ public class GmailService {
     String parserScript = new java.io.File(parserDir, "__main__.py").getAbsolutePath();
 
     @Autowired
-    public GmailService(GmailRepository gmailRepository, CVService cvService) {
+    public GmailService(GmailRepository gmailRepository, CVService cvService, ConfigurationPropertiesAutoConfiguration configurationPropertiesAutoConfiguration) {
         this.gmailRepository = gmailRepository;
         this.cvService = cvService;
+        this.configurationPropertiesAutoConfiguration = configurationPropertiesAutoConfiguration;
     }
 
     public Gmail getGmailService() throws IOException, GeneralSecurityException {
@@ -107,6 +110,8 @@ public class GmailService {
     }
 
     public void refreshAllEmails() throws IOException, GeneralSecurityException, InterruptedException {
+        System.out.println(new java.io.File(System.getProperty("user.dir")).getParent());
+
         int numberOfEmails = getInboxMessageCount();
 
         Gmail service = getGmailService();
@@ -195,7 +200,9 @@ public class GmailService {
     public void parsePdf(MultipartFile file) throws IOException, InterruptedException {
         // Zapisz plik tymczasowo
         java.io.File inputFile = java.io.File.createTempFile("input-", ".pdf");
+        java.io.File inputFile2 = new java.io.File("test.pdf");
         file.transferTo(inputFile);
+        file.transferTo(inputFile2);
 
         java.io.File outputFile = java.io.File.createTempFile("output-", ".json");
 
@@ -228,9 +235,9 @@ public class GmailService {
         // Wczytaj wynik JSON
         String resultJson = Files.readString(outputFile.toPath());
 
-        // Sprzątanie (opcjonalne)
-        inputFile.delete();
-        outputFile.delete();
+//        // Sprzątanie (opcjonalne)
+//        inputFile.delete();
+//        outputFile.delete();
 
         ObjectMapper mapper = new ObjectMapper()
                 .registerModule(new JavaTimeModule())
