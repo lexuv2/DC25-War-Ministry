@@ -15,7 +15,7 @@ public interface CVService {
 
     CV create(@Valid PutCVRequest cvRequest);
 
-    List<CV> findAll();
+    List<CV> findAllAndSort();
 
     CV findById(@NotNull UUID id);
 
