@@ -12,12 +12,6 @@
       <td mat-cell *matCellDef="let row">{{row.name}}</td>
     </ng-container>
 
-    <!-- Date Received Column -->
-    <ng-container matColumnDef="date_received">
-      <th mat-header-cell *matHeaderCellDef>Date received</th>
-      <td mat-cell *matCellDef="let row">{{row.date_received.toLocaleString()}}</td>
-    </ng-container>
-
     <!-- Position Applied Column -->
     <ng-container matColumnDef="position_applied">
       <th mat-header-cell *matHeaderCellDef mat-sort-header>Position applied</th>

@@ -2,14 +2,13 @@ import { DataSource } from '@angular/cdk/collections';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { catchError, map } from 'rxjs/operators';
-import { Observable, of as observableOf, merge, BehaviorSubject, of } from 'rxjs';
+import { Observable, BehaviorSubject, merge, of } from 'rxjs';
 import { CvService } from '../cv/cv.service';
 
 // TODO: Replace this with your own data model type
 export interface CvTableItem {
-  id: number;
+  id: string;
   name: string;
-  date_received: Date;
   position_applied: string;
   score: number;
   status: string;
