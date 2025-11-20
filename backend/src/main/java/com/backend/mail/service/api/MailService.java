@@ -1,6 +1,6 @@
 package com.backend.mail.service.api;
 
-import com.backend.mail.dto.PutMailRequest;
+import com.backend.Gmail.PutMailRequest;
 import com.backend.mail.entity.Mail;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;

@@ -1,6 +1,13 @@
 package com.backend.parser.controller;
 
+import com.backend.cv.dto.CvDto;
+import com.backend.cv.entity.CV;
+import com.backend.cv.service.api.CVService;
 import com.backend.shared.EndpointConstants;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -14,6 +21,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.file.Files;
+import java.util.Map;
 
 @RestController
 @RequestMapping(EndpointConstants.PARSER)
@@ -25,7 +33,12 @@ public class ParserController {
     String pythonExecutable = new File(parserDir, "venv/Scripts/python").getAbsolutePath();
     // Skrypt główny
     String parserScript = new File(parserDir, "__main__.py").getAbsolutePath();
+    CVService cvService;
 
+    @Autowired
+    public ParserController(CVService cvService) {
+        this.cvService = cvService;
+    }
 
     @PostMapping("/pdf")
     public ResponseEntity<String> parsePdf(@RequestParam("file") MultipartFile file) throws IOException, InterruptedException {
@@ -68,6 +81,13 @@ public class ParserController {
         // Sprzątanie (opcjonalne)
         inputFile.delete();
         outputFile.delete();
+
+        ObjectMapper mapper = new ObjectMapper()
+                .registerModule(new JavaTimeModule())
+                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        CvDto dto = mapper.readValue(resultJson, CvDto.class);
+        CV cv = cvService.processCV(dto);
+        System.out.println(cv.getFullName());
 
         return ResponseEntity.ok(resultJson);
     }

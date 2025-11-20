@@ -44,11 +44,11 @@ public class CVControllerImpl implements CVController {
     }
 
     @Override
-    public ResponseEntity<Object> getAll() {
+    public ResponseEntity<Object> getAllSorted() {
         return ApplicationResponseHandler.generateResponse(
                 ApplicationMessage.CV_FOUND,
                 HttpStatus.OK,
-                cvService.findAll()
+                cvService.findAllAndSort()
         );
     }
 
