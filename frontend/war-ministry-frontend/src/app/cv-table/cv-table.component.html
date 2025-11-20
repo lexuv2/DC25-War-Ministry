@@ -9,25 +9,19 @@
     <!-- Name Column -->
     <ng-container matColumnDef="name">
       <th mat-header-cell *matHeaderCellDef mat-sort-header>Name</th>
-      <td mat-cell *matCellDef="let row">{{row.name}}</td>
+      <td mat-cell *matCellDef="let row">{{row.fullName}}</td>
     </ng-container>
 
     <!-- Position Applied Column -->
     <ng-container matColumnDef="position_applied">
       <th mat-header-cell *matHeaderCellDef mat-sort-header>Position applied</th>
-      <td mat-cell *matCellDef="let row">{{row.position_applied}}</td>
+      <td mat-cell *matCellDef="let row">{{ row.position ? row.position : 'Ja też bym chciał wiedzieć' }}</td>
     </ng-container>
 
     <!-- Score Column -->
     <ng-container matColumnDef="score">
       <th mat-header-cell *matHeaderCellDef mat-sort-header>Score</th>
       <td mat-cell *matCellDef="let row">{{row.score}}</td>
-    </ng-container>
-
-    <!-- Status Column -->
-    <ng-container matColumnDef="status">
-      <th mat-header-cell *matHeaderCellDef>Status</th>
-      <td mat-cell *matCellDef="let row">{{row.status}}</td>
     </ng-container>
 
     <!-- View More Column -->
