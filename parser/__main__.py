@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 import sys
-
+sys.stdout.reconfigure(encoding='utf-8')
 
 def check_if_in_env() -> None:
     if sys.prefix == sys.base_prefix:
