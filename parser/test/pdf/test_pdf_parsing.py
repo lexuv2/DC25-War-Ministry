@@ -32,6 +32,7 @@ def test_parser_results(pdf_name, pdf_path):
     print(json.dumps(expected_data, indent=2, ensure_ascii=False))
     assert_dict_recursive(result_dict, expected_data, path=pdf_name)
 
+
 def assert_list_recursive(actual: list, expected: list, path="root"):
     for index, (actual_item, expected_item) in enumerate(zip(actual, expected)):
         current_path = f"{path}[{index}]"
@@ -53,6 +54,7 @@ def assert_list_recursive(actual: list, expected: list, path="root"):
             assert (
                 actual_item == expected_item
             ), f"Value mismatch at '{current_path}': expected {expected_item!r}, got {actual_item!r}"
+
 
 def assert_dict_recursive(actual: dict, expected: dict, path="root"):
     for key, expected_value in expected.items():

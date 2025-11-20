@@ -77,21 +77,25 @@ class WajchaRequired(BaseModel):
     no_asking: bool = False
     color_knowledge: bool = False
 
+
 class WajchaOptional(BaseModel):
     high_soft_skills: bool = False
     dead_lift_150kg: bool = False
     forklift: bool = False
     coffee_making: bool = False
 
+
 class WajchaKeywords(BaseModel):
     required: WajchaRequired
     optional: WajchaOptional
+
 
 class ZmecholRequired(BaseModel):
     north_south_east_west: bool = False
     fast_run: bool = False
     push_ups: bool = False
     kindergarten_graduate: bool = False
+
 
 class ZmecholOptional(BaseModel):
     driving_licence: bool = False
@@ -100,13 +104,16 @@ class ZmecholOptional(BaseModel):
     grade_school_graduate: bool = False
     multiplication_table_knowledge: bool = False
 
+
 class ZmecholKeywords(BaseModel):
     required: ZmecholRequired
     optional: ZmecholOptional
 
+
 class Keywords(BaseModel):
     wajcha_keywords: WajchaKeywords
     zmechol_keywords: ZmecholKeywords
+
 
 class CVParserSchema(BaseModel):
     personal_info: PersonalInfo
