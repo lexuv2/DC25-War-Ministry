@@ -16,9 +16,9 @@ public class RequestToCVFunction implements Function<PutCVRequest, CV>{
                 .fullName(cvRequest.fullName())
                 .email(cvRequest.email())
                 .address(cvRequest.address())
-                .birthDate(cvRequest.birthDate())
+                .dateOfBirth(cvRequest.dateOfBirth())
                 .nationality(cvRequest.nationality())
-                .phoneNumber(cvRequest.phoneNumber())
+                .phone(cvRequest.phone())
                 .build();
     }
 

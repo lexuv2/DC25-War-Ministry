@@ -1,7 +1,7 @@
 package com.backend.mail.controller.api;
 
 
-import com.backend.mail.dto.PutMailRequest;
+import com.backend.Gmail.PutMailRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 

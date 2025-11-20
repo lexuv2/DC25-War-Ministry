@@ -11,10 +11,10 @@ import java.util.UUID;
 
 public record PutCVRequest(
         @NotEmpty String fullName,
-        @JsonFormat(pattern = "yyyy-MM-dd") LocalDate birthDate,
+        @JsonFormat(pattern = "yyyy-MM-dd") LocalDate dateOfBirth,
         @NotBlank String nationality,
         @NotBlank String email,
-        @NotBlank String phoneNumber,
+        @NotBlank String phone,
         String address
 ) {
 }

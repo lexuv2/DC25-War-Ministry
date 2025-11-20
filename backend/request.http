@@ -1,0 +1,74 @@
+### Get Labels
+
+GET http://localhost:8080/gmail/labels
+
+### Get mail count
+
+GET http://localhost:8080/gmail/inbox/count
+
+### Get Mail + attachment
+
+GET http://localhost:8080/gmail/inbox/0
+
+### Refresh mails
+
+GET http://localhost:8080/gmail/refresh
+
+### Send new acceptance mail
+
+PUT http://localhost:8080/gmail/send
+Content-Type: application/json
+Authorization: Basic a2V2aW46dXNlcnVzZXI=
+
+{
+  "emailAddress": "alex2003gd@gmail.com",
+  "wasAccepted": true,
+  "Reason": "",
+  "meetingDetails": "Monday, October 27th, at 1:15 pm",
+  "position": "Ciągacz Wajchy"
+}
+
+### Send new defferance mail
+
+PUT http://localhost:8080/gmail/send
+Content-Type: application/json
+Authorization: Basic a2V2aW46dXNlcnVzZXI=
+
+{
+  "emailAddress": "alex2003gd@gmail.com",
+  "wasAccepted": false,
+  "Reason": "Za małe umiejętności miękkie.",
+  "meetingDetails": "Monday, October 27th, at 1:15 pm",
+  "position": "Piechota zmechanizowana"
+}
+
+### Send new acceptance mail to tymon
+
+PUT http://localhost:8080/gmail/send
+Content-Type: application/json
+Authorization: Basic a2V2aW46dXNlcnVzZXI=
+
+{
+  "emailAddress": "tymonbielski@gmail.com",
+  "wasAccepted": true,
+  "Reason": "",
+  "meetingDetails": "Monday, October 27th, at 1:15 pm",
+  "position": "Ciągacz Wajchy"
+}
+
+### Send new defferance mail to tymon
+
+PUT http://localhost:8080/gmail/send
+Content-Type: application/json
+Authorization: Basic a2V2aW46dXNlcnVzZXI=
+
+{
+  "emailAddress": "tymonbielski@gmail.com",
+  "wasAccepted": false,
+  "Reason": "Za małe umiejętności miękkie.",
+  "meetingDetails": "Monday, October 27th, at 1:15 pm",
+  "position": "Piechota zmechanizowana"
+}
+
+### Get Candidates
+GET http://localhost:8080/cv
