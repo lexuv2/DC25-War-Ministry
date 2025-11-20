@@ -45,6 +45,16 @@ public class GmailController {
         return gmailService.getNthNewestMail(index);
     }
 
+    @GetMapping("/refresh")
+    public ResponseEntity<String> refreshAllEmails() throws Exception {
+        try {
+            gmailService.refreshAllEmails();
+            return ResponseEntity.ok("Emails refreshed successfully.");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Failed to refresh emails.\n" + e.getMessage());
+        }
+    }
+
     @PutMapping("/send")
     public ResponseEntity<String> sendMail(@RequestBody PutMailRequest request) throws Exception {
         boolean success = gmailService.sendMail(request);
@@ -55,7 +65,7 @@ public class GmailController {
         }
     }
 
-    public Boolean checkIfWasHandled(int id) {
+    public Boolean checkIfWasHandled(String id) {
         return gmailService.checkIfWasHandled(id);
     }
 }

@@ -8,7 +8,11 @@ GET http://localhost:8080/gmail/inbox/count
 
 ### Get Mail + attachment
 
-GET http://localhost:8080/gmail/inbox/2
+GET http://localhost:8080/gmail/inbox/0
+
+### Refresh mails
+
+GET http://localhost:8080/gmail/refresh
 
 ### Send new acceptance mail
 

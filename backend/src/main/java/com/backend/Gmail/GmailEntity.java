@@ -17,7 +17,7 @@ import java.util.UUID;
 @Table(name = "gmail")
 public class GmailEntity {
     @Id
-    private int messageId;
+    private String messageId;
 
     @Column(nullable = false)
     private String emailAddress;
