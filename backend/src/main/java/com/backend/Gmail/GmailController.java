@@ -1,5 +1,7 @@
 package com.backend.Gmail;
 
+import com.backend.shared.ApplicationMessage;
+import com.backend.shared.ApplicationResponseHandler;
 import com.backend.shared.EndpointConstants;
 import com.google.api.services.gmail.Gmail;
 import com.google.api.services.gmail.model.ListLabelsResponse;
@@ -10,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 @RestController
 @RequestMapping(EndpointConstants.GMAIL)
@@ -50,5 +53,9 @@ public class GmailController {
         } else {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Failed to send email.");
         }
+    }
+
+    public Boolean checkIfWasHandled(int id) {
+        return gmailService.checkIfWasHandled(id);
     }
 }

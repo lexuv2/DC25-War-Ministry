@@ -17,6 +17,7 @@ import com.google.api.services.gmail.GmailScopes;
 import com.google.api.services.gmail.model.*;
 import com.google.api.services.gmail.model.Message;
 import org.apache.commons.codec.binary.Base64;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.DriveScopes;
@@ -37,6 +38,13 @@ public class GmailService {
 
     private static final List<String> SCOPES = List.of(GmailScopes.GMAIL_READONLY, GmailScopes.GMAIL_LABELS, GmailScopes.GMAIL_COMPOSE, GmailScopes.GMAIL_SEND, GmailScopes.GMAIL_MODIFY, DriveScopes.DRIVE);
     private static final String CREDENTIALS_FILE_PATH = "/client_secret_270311492495-ip027ghqo1181v4qd288vv2203rjnu5v.apps.googleusercontent.com.json";
+
+    private final GmailRepository gmailRepository;
+
+    @Autowired
+    public GmailService(GmailRepository gmailRepository) {
+        this.gmailRepository = gmailRepository;
+    }
 
     public Gmail getGmailService() throws IOException, GeneralSecurityException {
         final NetHttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
@@ -143,6 +151,14 @@ public class GmailService {
                 result.put("attachment_" + (i + 1) + "_data", entry.getValue());
             }
         }
+
+        //tworzy nowy obiekt zawierajacy tylko id wiadomosci, adres mailowy i od razu ustawia wasHandled na true
+        GmailEntity gmailEntity = new GmailEntity();
+        gmailEntity.setMessageId(Integer.parseInt(messageId));
+        gmailEntity.setEmailAddress(from);
+        gmailEntity.setWasHandled(true);
+        gmailRepository.save(gmailEntity);
+
 
         return result;
     }
@@ -271,6 +287,10 @@ public class GmailService {
             }
         }
         return false;
+    }
+
+    public Boolean checkIfWasHandled(int id) {
+        return gmailRepository.findByMessageId(id).getWasHandled();
     }
 
     private MimeMessage createEmail(String toEmailAddress,

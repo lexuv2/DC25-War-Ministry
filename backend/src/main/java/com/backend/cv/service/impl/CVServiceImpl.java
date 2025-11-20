@@ -15,7 +15,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import java.util.Comparator;
 import java.util.List;
+import java.util.Random;
 import java.util.UUID;
 
 @Service
@@ -39,8 +41,10 @@ public class CVServiceImpl implements CVService {
     }
 
     @Override
-    public List<CV> findAll() {
-        return cvRepository.findAll();
+    public List<CV> findAllAndSort() {
+        List<CV> cvs = cvRepository.findAll();
+        cvs.sort(Comparator.comparing(CV::getScore).reversed());
+        return cvs;
     }
 
     @Override
@@ -131,6 +135,8 @@ public class CVServiceImpl implements CVService {
                         })
                         .toList()
         );
+
+        cv.setScore((int)(Math.random() * 100));
 
         return cvRepository.save(cv);
     }
