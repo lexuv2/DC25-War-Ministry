@@ -33,6 +33,29 @@ def test_parser_results(pdf_name, pdf_path):
     assert_dict_recursive(result_dict, expected_data, path=pdf_name)
 
 
+def assert_list_recursive(actual: list, expected: list, path="root"):
+    for index, (actual_item, expected_item) in enumerate(zip(actual, expected)):
+        current_path = f"{path}[{index}]"
+
+        if isinstance(expected_item, dict):
+            assert isinstance(
+                actual_item, dict
+            ), f"Expected dict at '{current_path}', got {type(actual_item)}"
+            assert_dict_recursive(actual_item, expected_item, path=current_path)
+        elif isinstance(expected_item, list):
+            assert isinstance(
+                actual_item, list
+            ), f"Expected list at '{current_path}', got {type(actual_item)}"
+            assert len(actual_item) == len(
+                expected_item
+            ), f"List length mismatch at '{current_path}'"
+            assert_list_recursive(actual_item, expected_item, path=current_path)
+        else:
+            assert (
+                actual_item == expected_item
+            ), f"Value mismatch at '{current_path}': expected {expected_item!r}, got {actual_item!r}"
+
+
 def assert_dict_recursive(actual: dict, expected: dict, path="root"):
     for key, expected_value in expected.items():
         assert key in actual, f"Missing key '{path}.{key}'"
@@ -51,6 +74,7 @@ def assert_dict_recursive(actual: dict, expected: dict, path="root"):
             assert len(actual_value) == len(
                 expected_value
             ), f"List length mismatch at '{path}.{key}'"
+            assert_list_recursive(actual_value, expected_value, path=f"{path}.{key}")
         else:
             assert (
                 actual_value == expected_value
