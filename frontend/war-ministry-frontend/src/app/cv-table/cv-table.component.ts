@@ -21,7 +21,7 @@ export class CvTableComponent implements AfterViewInit {
   errorMessage: string | null = null;
 
   /** Columns displayed in the table. Columns IDs can be added, removed, or reordered. */
-  displayedColumns = ['name', 'date_received', 'position_applied', 'score', 'status', 'view_more'];
+  displayedColumns = ['name', 'position_applied', 'score', 'view_more'];
 
   constructor(private cvService: CvService, private snackBar: MatSnackBar) {
     this.dataSource = new CvTableDataSource(this.cvService);
@@ -39,5 +39,16 @@ export class CvTableComponent implements AfterViewInit {
         });
       }
     });
+  }
+
+  onRefreshMail() {
+    this.cvService.sendMailRefresh().subscribe(
+    () => {
+      console.log('HURRA');
+    },
+    error => {
+      console.error('NIE MA MOWY', error);
+    }
+  );
   }
 }

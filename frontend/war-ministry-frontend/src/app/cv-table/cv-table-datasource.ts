@@ -2,15 +2,14 @@ import { DataSource } from '@angular/cdk/collections';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { catchError, map } from 'rxjs/operators';
-import { Observable, of as observableOf, merge, BehaviorSubject, of } from 'rxjs';
+import { Observable, BehaviorSubject, merge, of } from 'rxjs';
 import { CvService } from '../cv/cv.service';
 
 // TODO: Replace this with your own data model type
 export interface CvTableItem {
-  id: number;
-  name: string;
-  date_received: Date;
-  position_applied: string;
+  id: string;
+  fullName: string;
+  position: string;
   score: number;
   status: string;
 }
@@ -95,10 +94,10 @@ export class CvTableDataSource extends DataSource<CvTableItem> {
     return data.sort((a, b) => {
       const isAsc = this.sort?.direction === 'asc';
       switch (this.sort?.active) {
-        case 'name': return compare(a.name, b.name, isAsc);
+        case 'fullName': return compare(a.fullName, b.fullName, isAsc);
         case 'id': return compare(+a.id, +b.id, isAsc);
         case 'score': return compare(a.score, b.score, isAsc);
-        case 'position_applied': return compare(a.position_applied, b.position_applied, isAsc);
+        case 'position': return compare(a.position, b.position, isAsc);
         default: return 0;
       }
     });

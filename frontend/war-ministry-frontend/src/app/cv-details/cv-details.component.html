@@ -1,164 +1,121 @@
 Status: nieznany
-<button matButton="elevated">Akceptuj</button>
-<button matButton="elevated">Odrzuć</button>
+<button matButton="elevated" (click)="onAccept()">Akceptuj</button>
+<button matButton="elevated" (click)="onReject()">Odrzuć</button>
+<p>Wynik: {{ cv.score }}</p>
 
-<ul>
-    <li>Szczegóły CV
-        <table>
-            <tr>
-                <td>Imię i nazwisko</td>
-                <td>TEST</td>
-            </tr>
-            <tr>
-                <td>Data urodzenia</td>
-                <td>TEST</td>
-            </tr>
-            <tr>
-                <td>Narodowość</td>
-                <td>TEST</td>
-            </tr>
-            <tr>
-                <td>Adres e-mail</td>
-                <td>TEST</td>
-            </tr>
-            <tr>
-                <td>Numer telefonu</td>
-                <td>TEST</td>
-            </tr>
-            <tr>
-                <td>Adres zamieszkania</td>
-                <td>TEST</td>
-            </tr>
-        </table>
-    </li>
+<div class="grid-container">
+  <mat-grid-list cols="3">
 
-    <li>Edukacja
-        <table>
-            <thead>
-                <tr>
-                    <th>Stopień</th>
-                    <th>Instytucja</th>
-                    <th>Data rozpoczęcia</th>
-                    <th>Data ukończenia</th>
-                    <th>Dziedzina</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>TEST1</td>
-                    <td>TEST1</td>
-                    <td>TEST1</td>
-                    <td>TEST1</td>
-                    <td>TEST1</td>
-                </tr>
-                <tr>
-                    <td>TEST2</td>
-                    <td>TEST2</td>
-                    <td>TEST2</td>
-                    <td>TEST2</td>
-                    <td>TEST2</td>
-                </tr>
-            </tbody>
-        </table>
-    </li>
+  <mat-grid-tile colspan="3">
+    <mat-card>
+      <mat-card-title>{{ cv.fullName }}</mat-card-title>
+      <mat-card-content>
+        <p>Data urodzenia: {{ cv.dateOfBirth }}</p>
+        <p>Narodowość: {{ cv.nationality }}</p>
+        <p>E-mail: {{ cv.email }}</p>
+        <p>Telefon: {{ cv.phone }}</p>
+        <p>Adres: {{ cv.address }}</p>
+      </mat-card-content>
+    </mat-card>
+  </mat-grid-tile>
 
-    <li>Doświadczenie zawodowe
-        <table>
-            <thead>
-                <tr>
-                    <th>Stanowisko</th>
-                    <th>Pracodawca</th>
-                    <th>Data rozpoczęcia</th>
-                    <th>Data zakończenia</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>TEST1</td>
-                    <td>TEST1</td>
-                    <td>TEST1</td>
-                    <td>TEST1</td>
-                </tr>
-                <tr>
-                    <td>TEST2</td>
-                    <td>TEST2</td>
-                    <td>TEST2</td>
-                    <td>TEST2</td>
-                </tr>
-            </tbody>
-        </table>
-    </li>
+  <mat-grid-tile colspan="3">
+    <mat-card>
+      <mat-card-title>Edukacja</mat-card-title>
+      <mat-card-content>
+        <mat-list>
+          <mat-list-item *ngFor="let edu of cv.education">
+            <div>
+              {{ edu.degree }} - {{ edu.fieldOfStudy }}  
+              <br/>
+              {{ edu.institution }} ({{ edu.startDate }} - {{ edu.endDate }})
+            </div>
+          </mat-list-item>
+        </mat-list>
+      </mat-card-content>
+    </mat-card>
+  </mat-grid-tile>
 
-    <li>Skills
-        <ul>
-            <li>TEST1</li>
-            <li>TEST2</li>
-            <li>TEST3</li>
-            <li>TEST4</li>
-        </ul>
-    </li>
+  <mat-grid-tile colspan="3">
+    <mat-card>
+      <mat-card-title>Doświadczenie zawodowe</mat-card-title>
+      <mat-card-content>
+        <mat-list>
+          <mat-list-item *ngFor="let w of cv.workExperience">
+            <div>
+              {{ w.jobTitle }} - {{ w.company }}
+              <br />
+              {{ w.startDate }} - {{ w.endDate }}
+            </div>
+          </mat-list-item>
+        </mat-list>
+      </mat-card-content>
+    </mat-card>
+  </mat-grid-tile>
 
-    <li>Certyfikaty
-        <table>
-            <thead>
-                <tr>
-                    <th>Nazwa</th>
-                    <th>Organizacja wystawiająca</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>TEST</td>
-                    <td>TEST</td>
-                </tr>
-            </tbody>
-        </table>
-    </li>
+  <mat-grid-tile colspan="3">
+    <mat-card>
+      <mat-card-title>Doświadczenie wojskowe</mat-card-title>
+      <mat-card-content>
+        <mat-accordion>
+          <mat-expansion-panel *ngFor="let mil of cv.militaryExperience">
+            <mat-expansion-panel-header>
+              <mat-panel-title>
+                {{ mil.rank }} — {{ mil.branch }}
+              </mat-panel-title>
+              <mat-panel-description>
+                {{ mil.startDate }} - {{ mil.endDate }}
+              </mat-panel-description>
+            </mat-expansion-panel-header>
 
-    <li>Języki
-        <table>
-            <thead>
-                <tr>
-                    <th>Język</th>
-                    <th>Poziom</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>TEST</td>
-                    <td>TEST</td>
-                </tr>
-            </tbody>
-        </table>
-    </li>
+            <p>Duties:</p>
+            <ul>
+              <li *ngFor="let duty of mil.duties">{{ duty }}</li>
+            </ul>
 
-    <li>Doświadczenie wojskowe
-        <table>
-            <thead>
-                <tr>
-                    <th>Ranga</th>
-                    <th>Gałąź</th>
-                    <th>Data rozpoczęcia</th>
-                    <th>Data zakończenia</th>
-                    <th>Obowiązki</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>TEST1</td>
-                    <td>TEST1</td>
-                    <td>TEST1</td>
-                    <td>TEST1</td>
-                    <td>TEST1</td>
-                </tr>
-                <tr>
-                    <td>TEST2</td>
-                    <td>TEST2</td>
-                    <td>TEST2</td>
-                    <td>TEST2</td>
-                    <td>TEST2</td>
-                </tr>
-            </tbody>
-        </table>
-    </li>
-</ul>
+          </mat-expansion-panel>
+        </mat-accordion>
+      </mat-card-content>
+    </mat-card>
+  </mat-grid-tile>
+
+  <mat-grid-tile colspan="1">
+    <mat-card>
+      <mat-card-title>Umiejętności</mat-card-title>
+      <mat-card-content>
+        <mat-chip-set>
+          <mat-chip *ngFor="let skill of cv.skills">{{ skill }}</mat-chip>
+        </mat-chip-set>
+      </mat-card-content>
+    </mat-card>
+  </mat-grid-tile>
+
+  <mat-grid-tile colspan="1">
+    <mat-card>
+      <mat-card-title>Języki</mat-card-title>
+      <mat-card-content>
+        <mat-list>
+          <mat-list-item *ngFor="let lang of cv.languages">
+            {{ lang.language }} - {{ lang.proficiency }}
+          </mat-list-item>
+        </mat-list>
+      </mat-card-content>
+    </mat-card>
+  </mat-grid-tile>
+
+  <mat-grid-tile colspan="1">
+    <mat-card>
+      <mat-card-title>Certyfikaty</mat-card-title>
+      <mat-card-content>
+        <mat-list>
+          <mat-list-item *ngFor="let cert of cv.certifications">
+            {{ cert.name }}<br>
+            {{ cert.issuingOrganization }}
+          </mat-list-item>
+        </mat-list>
+      </mat-card-content>
+    </mat-card>
+  </mat-grid-tile>
+
+</mat-grid-list>
+</div>
