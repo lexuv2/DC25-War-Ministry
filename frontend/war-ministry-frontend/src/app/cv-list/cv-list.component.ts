@@ -8,5 +8,7 @@ import { CvTableComponent } from '../cv-table/cv-table.component';
   styleUrl: './cv-list.component.scss'
 })
 export class CvListComponent {
-
+  onRefreshMail(): void {
+  
+}
 }

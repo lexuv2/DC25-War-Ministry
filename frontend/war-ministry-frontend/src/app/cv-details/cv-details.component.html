@@ -1,10 +1,10 @@
 Status: nieznany
-<button matButton="elevated">Akceptuj</button>
-<button matButton="elevated">Odrzuć</button>
+<button matButton="elevated" (click)="onAccept()">Akceptuj</button>
+<button matButton="elevated" (click)="onReject()">Odrzuć</button>
 <p>Wynik: {{ cv.score }}</p>
 
 <div class="grid-container">
-  <mat-grid-list cols="3" rowHeight="350px">
+  <mat-grid-list cols="3">
 
   <mat-grid-tile colspan="3">
     <mat-card>
@@ -53,6 +53,32 @@ Status: nieznany
     </mat-card>
   </mat-grid-tile>
 
+  <mat-grid-tile colspan="3">
+    <mat-card>
+      <mat-card-title>Doświadczenie wojskowe</mat-card-title>
+      <mat-card-content>
+        <mat-accordion>
+          <mat-expansion-panel *ngFor="let mil of cv.militaryExperience">
+            <mat-expansion-panel-header>
+              <mat-panel-title>
+                {{ mil.rank }} — {{ mil.branch }}
+              </mat-panel-title>
+              <mat-panel-description>
+                {{ mil.startDate }} - {{ mil.endDate }}
+              </mat-panel-description>
+            </mat-expansion-panel-header>
+
+            <p>Duties:</p>
+            <ul>
+              <li *ngFor="let duty of mil.duties">{{ duty }}</li>
+            </ul>
+
+          </mat-expansion-panel>
+        </mat-accordion>
+      </mat-card-content>
+    </mat-card>
+  </mat-grid-tile>
+
   <mat-grid-tile colspan="1">
     <mat-card>
       <mat-card-title>Umiejętności</mat-card-title>
@@ -87,32 +113,6 @@ Status: nieznany
             {{ cert.issuingOrganization }}
           </mat-list-item>
         </mat-list>
-      </mat-card-content>
-    </mat-card>
-  </mat-grid-tile>
-
-  <mat-grid-tile colspan="3">
-    <mat-card>
-      <mat-card-title>Doświadczenie wojskowe</mat-card-title>
-      <mat-card-content>
-        <mat-accordion>
-          <mat-expansion-panel *ngFor="let mil of cv.militaryExperience">
-            <mat-expansion-panel-header>
-              <mat-panel-title>
-                {{ mil.rank }} — {{ mil.branch }}
-              </mat-panel-title>
-              <mat-panel-description>
-                {{ mil.startDate }} - {{ mil.endDate }}
-              </mat-panel-description>
-            </mat-expansion-panel-header>
-
-            <p>Duties:</p>
-            <ul>
-              <li *ngFor="let duty of mil.duties">{{ duty }}</li>
-            </ul>
-
-          </mat-expansion-panel>
-        </mat-accordion>
       </mat-card-content>
     </mat-card>
   </mat-grid-tile>

@@ -40,4 +40,15 @@ export class CvTableComponent implements AfterViewInit {
       }
     });
   }
+
+  onRefreshMail() {
+    this.cvService.sendMailRefresh().subscribe(
+    () => {
+      console.log('HURRA');
+    },
+    error => {
+      console.error('NIE MA MOWY', error);
+    }
+  );
+  }
 }

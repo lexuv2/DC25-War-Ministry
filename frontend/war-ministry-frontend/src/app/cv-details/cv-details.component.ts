@@ -112,6 +112,45 @@ export class CvDetailsComponent {
           this.cv = data;
           this.error$.next(null);
         }
-      });
+      }
+    );
+  }
+
+  onAccept(): void {
+    const requestData = {
+      emailAddress: this.cv.email,
+      wasAccepted: true,
+      Reason: "Jesteś świetny",
+      meetingDetails: "Jak najszybciej",
+      position: "Obojętnie"
+    };
+
+    this.cvService.sendMail(requestData).subscribe(
+      response => {
+        console.log('Akceptacja', response);
+      },
+      error => {
+        console.error('BŁĄD:', error);
+      }
+    );
+  }
+
+  onReject(): void {
+    const requestData = {
+      emailAddress: this.cv.email,
+      wasAccepted: false,
+      Reason: "Nie nadajesz się :((((",
+      meetingDetails: "Nigdy",
+      position: "Obie"
+    };
+
+    this.cvService.sendMail(requestData).subscribe(
+      response => {
+        console.log('Odmowa', response);
+      },
+      error => {
+        console.error('BŁĄD:', error);
+      }
+    );
   }
 }

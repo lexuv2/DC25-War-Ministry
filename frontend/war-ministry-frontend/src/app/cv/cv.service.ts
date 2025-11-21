@@ -21,4 +21,12 @@ export class CvService {
     return this.http.get<{data: CvDetails}>(`http://localhost:8080/cv/${id}`)
       .pipe(map(res => res.data));
   }
+
+  sendMail(data: any) {
+    return this.http.put('http://localhost:8080/gmail/send', data);
+  }
+
+  sendMailRefresh() {
+    return this.http.get('http://localhost:8080/gmail/refresh');
+  }
 }
