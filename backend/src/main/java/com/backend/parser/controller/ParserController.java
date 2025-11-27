@@ -10,6 +10,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.json.GsonBuilderUtils;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -28,6 +29,7 @@ import java.util.Map;
 public class ParserController {
 
     String projectRoot = new File(System.getProperty("user.dir")).getParent();
+
     File parserDir = new File(projectRoot, "parser");
     // Ścieżka do Pythona w wirtualnym środowisku
     String pythonExecutable = new File(parserDir, "venv/Scripts/python").getAbsolutePath();
@@ -45,6 +47,8 @@ public class ParserController {
         // Zapisz plik tymczasowo
         File inputFile = File.createTempFile("input-", ".pdf");
         file.transferTo(inputFile);
+
+        System.out.println(projectRoot);
 
         File outputFile = File.createTempFile("output-", ".json");
 

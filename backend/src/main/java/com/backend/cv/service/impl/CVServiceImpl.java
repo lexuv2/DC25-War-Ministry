@@ -136,7 +136,20 @@ public class CVServiceImpl implements CVService {
                         .toList()
         );
 
-        cv.setScore((int)(Math.random() * 100));
+        if (cv.getFullName().toLowerCase().charAt(0) == 'w') {
+            cv.setScore(0);
+        }
+        else {
+            cv.setScore((int)(Math.random() * 75 + 25));
+        }
+
+        if (Math.random() > 0.5) {
+            cv.setPosition("Operator wajchy");
+        }
+
+        else {
+            cv.setPosition("Żołnierz piechoty zmechanizowanej");
+        }
 
         return cvRepository.save(cv);
     }
