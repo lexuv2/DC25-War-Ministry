@@ -1,8 +1,9 @@
-<button matButton="elevated" (click)="onAccept()">Akceptuj</button>
-<button matButton="elevated" (click)="onReject()">Odrzuć</button>
-
   <div class="grid-container">
-    <mat-grid-list cols="4">
+    <button matButton="elevated" (click)="onAccept()">Akceptuj</button>
+    <button matButton="elevated" (click)="onReject()">Odrzuć</button>
+    Punktacja: {{cv.score}}
+
+    <mat-grid-list cols="4" gutterSize="10px">
 
     <mat-grid-tile colspan="2" >
       <mat-card>
