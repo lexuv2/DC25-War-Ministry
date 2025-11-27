@@ -1,3 +1,6 @@
+@import url('https://fonts.googleapis.com/css2?family=Stardos+Stencil:wght@700&display=swap');
+
+
 .sidenav-container {
   height: 100%;
 }
@@ -15,3 +18,98 @@
   top: 0;
   z-index: 1;
 }
+
+.sidenav-container {
+  $military-green: #1b2a1f;
+  $military-green-light: #263a2c;
+  $military-green-accent: #3b593d;
+  $military-border: #4a5e4c;
+  $military-text: #d7dfd7;
+  $military-text-muted: #9aaa9a;
+  $military-black: #0f140f;
+
+  background: $military-black;
+
+  .mat-toolbar {
+    background: $military-green-light !important;
+    color: $military-text !important;
+    border-bottom: 1px solid $military-border;
+  }
+
+  .sidenav {
+    background: $military-green !important;
+    color: $military-text;
+
+    mat-toolbar {
+      background: $military-green-accent !important;
+      color: $military-text;
+    }
+  }
+
+  mat-sidenav-content {
+    background: $military-black;
+    color: $military-text;
+  }
+
+  mat-nav-list {
+    a.mat-list-item {
+      color: $military-text-muted;
+      transition: 0.2s;
+
+      &:hover {
+        background: $military-green-accent;
+        color: $military-text;
+      }
+    }
+  }
+
+  button[mat-icon-button] {
+    color: $military-text;
+
+    mat-icon {
+      color: $military-text;
+    }
+
+    &:hover mat-icon {
+      color: $military-text !important;
+    }
+  }
+
+  mat-sidenav {
+    border-radius: 0;
+  }
+
+  .mat-toolbar,
+  .mat-mdc-toolbar {
+    font-size: clamp(1rem, 2.5vw, 1.7rem);
+    font-family: inherit;
+    font-family: 'Stardos Stencil', sans-serif;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: $military-text;
+  }
+
+  .mat-toolbar span,
+  .mat-mdc-toolbar-row {
+    white-space: normal !important;
+    line-height: 1.25;
+    font-family: 'Stardos Stencil', sans-serif;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: $military-text;
+  }
+
+  --mdc-list-list-item-label-text-color: #{$military-text};
+  --mat-sys-on-surface: #{$military-text};
+
+  mat-nav-list {
+    a.mat-list-item {
+      color: $military-text !important;
+    }
+
+    a.mat-list-item:hover {
+      color: $military-text-muted !important;
+    }
+  }
+}
+

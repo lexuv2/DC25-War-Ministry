@@ -2,3 +2,80 @@
 
 html, body { height: 100%; }
 body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+
+$military-green: #1b2a1f;
+$military-green-light: #263a2c;
+$military-green-accent: #3b593d;
+$military-border: #4a5e4c;
+$military-text: #d7dfd7;
+$military-text-muted: #9aaa9a;
+
+/* Paginator select text (before opening) */
+mat-paginator .mat-mdc-select-value-text,
+mat-paginator .mat-mdc-select-value,
+mat-paginator .mat-mdc-select-placeholder {
+  color: $military-text !important;
+}
+
+mat-paginator .mat-mdc-select-arrow {
+  color: $military-text !important;
+}
+
+.mat-mdc-select,
+.mat-mdc-form-field {
+  --mdc-theme-primary: #{$military-green-accent} !important;
+  --mdc-focus-ring-color: #{$military-green-accent} !important;
+  --mdc-filled-text-field-focus-active-indicator-color: #{$military-green-accent} !important;
+}
+
+.cdk-overlay-container .mat-mdc-select-panel {
+  background: $military-green-light !important;
+  color: $military-text !important;
+  border: 1px solid $military-border !important;
+}
+
+.cdk-overlay-container .mat-mdc-option {
+  background: $military-green !important;
+  color: $military-text !important;
+  border-bottom: 1px solid $military-border !important;
+}
+
+.cdk-overlay-container .mat-mdc-option:hover {
+  background: $military-green-accent !important;
+}
+
+.cdk-overlay-container .mat-mdc-option.mdc-list-item--selected {
+  background: $military-green-accent !important;
+  color: $military-text !important;
+}
+
+.cdk-overlay-container .mat-mdc-option .mdc-list-item__primary-text {
+  color: $military-text !important;
+}
+
+// BOOM
+.boom-particle {
+  position: fixed;
+  z-index: 999999;
+  pointer-events: none;
+
+  width: 8px;
+  height: 8px;
+  background: radial-gradient(circle, #ffcc00, #ff5500);
+  border-radius: 50%;
+
+  transform: translate(-50%, -50%);
+  animation: boom-explode 0.7s ease-out forwards;
+}
+
+@keyframes boom-explode {
+  0% {
+    transform: translate(0, 0) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(calc(var(--dx) * 40px), calc(var(--dy) * 40px))
+      scale(0.2);
+    opacity: 0;
+  }
+}

@@ -1,3 +1,89 @@
 .full-width-table {
   width: 100%;
 }
+
+$military-green: #1b2a1f;
+$military-green-light: #263a2c;
+$military-green-accent: #3b593d;
+$military-border: #4a5e4c;
+$military-text: #d7dfd7;
+$military-text-muted: #9aaa9a;
+
+.mat-elevation-z2,
+.mat-mdc-table {
+  background: $military-green !important;
+  color: $military-text !important;
+}
+
+.mdc-data-table__header-row,
+.mdc-data-table__header-cell {
+  background: $military-green-light !important;
+  color: $military-text !important;
+  border-bottom: 1px solid $military-border !important;
+}
+
+.mdc-data-table__row,
+.mdc-data-table__cell {
+  background: $military-green !important;
+  color: $military-text !important;
+  border-bottom: 1px solid $military-border !important;
+}
+
+.mdc-data-table__row:hover .mdc-data-table__cell {
+  background: $military-green-accent !important;
+}
+
+.mat-sort-header-arrow {
+  color: $military-text-muted !important;
+}
+
+button[mat-button],
+button[mat-raised-button],
+button[matButton],
+button[mat-flat-button] {
+  background: $military-green-accent !important;
+  color: $military-text !important;
+  border: 1px solid $military-border !important;
+  padding: 8px 20px;
+  font-size: 14px;
+  border-radius: 20px;
+}
+
+mat-paginator {
+  background: $military-green-light !important;
+  color: $military-text !important;
+}
+
+mat-paginator .mat-mdc-paginator-icon,
+mat-paginator .mat-mdc-select-value {
+  color: $military-text !important;
+}
+
+.mat-elevation-z2 {
+  margin: 16px;
+}
+
+button[mat-button],
+button[mat-raised-button],
+button[matButton],
+button[mat-flat-button] {
+  background: $military-green-accent !important;
+  color: $military-text !important;
+  border: 1px solid $military-border !important;
+  padding: 8px 20px;
+  font-size: 14px;
+  border-radius: 20px;
+  transition: background 0.3s, transform 0.2s;
+
+  &:hover {
+    transform: scale(1.05);
+  }
+}
+
+// Change button color when the table row is hovered
+.mdc-data-table__row:hover button[mat-button],
+.mdc-data-table__row:hover button[mat-raised-button],
+.mdc-data-table__row:hover button[matButton],
+.mdc-data-table__row:hover button[mat-flat-button] {
+  background: darken($military-green-accent, 10%) !important;
+}

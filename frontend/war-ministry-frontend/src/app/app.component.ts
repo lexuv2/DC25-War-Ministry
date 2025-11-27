@@ -1,9 +1,10 @@
 import { Component } from '@angular/core';
 import { NavbarComponent } from './navbar/navbar.component';
+import { ClickBoomDirective } from './click-boom.directive';
 
 @Component({
   selector: 'app-root',
-  imports: [NavbarComponent],
+  imports: [NavbarComponent, ClickBoomDirective],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
 })

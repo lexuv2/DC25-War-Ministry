@@ -1,0 +1,167 @@
+$military-green: #1b2a1f;
+$military-green-light: #263a2c;
+$military-green-accent: #3b593d;
+$military-border: #4a5e4c;
+$military-text: #d7dfd7;
+$military-text-muted: #9aaa9a;
+
+button[matButton="elevated"] {
+  margin: 10px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  padding: 10px 20px;
+  border-radius: 8px;
+  border: 2px solid $military-border;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
+  text-transform: uppercase;
+
+  background-color: $military-green !important;
+  color: $military-text !important;
+
+  &:hover {
+    background-color: $military-green-accent !important;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+  }
+
+  &:active {
+    background-color: $military-green-light !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    transform: translateY(1px);
+  }
+
+  &.accept {
+    background-color: $military-green !important;
+    border-color: $military-border !important;
+
+    &:hover {
+      background-color: $military-green-accent !important;
+    }
+
+    &:active {
+      background-color: $military-green-light !important;
+    }
+  }
+
+  &.reject {
+    background-color: transparent !important;
+    color: $military-text-muted !important;
+    border-color: $military-border !important;
+
+    &:hover {
+      background-color: $military-green-accent !important;
+    }
+
+    &:active {
+      background-color: $military-green-light !important;
+    }
+  }
+}
+
+
+
+
+.grid-container {
+  padding: 20px;
+  background-color: $military-green-light;
+  min-height: 100vh;
+
+  mat-grid-list {
+    gap: 20px;
+
+    mat-grid-tile {
+      mat-card {
+        background-color: $military-green;
+        color: $military-text;
+        border: 1px solid $military-border;
+        box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.5);
+
+        mat-card-title {
+          font-size: 1.5rem;
+          font-weight: bold;
+          color: $military-text;
+          border-bottom: 1px solid $military-border;
+          padding: 10px;
+          margin-bottom: 10px;
+        }
+
+        mat-card-content {
+          p, li, div {
+            color: $military-text;
+            line-height: 1.5;
+          }
+
+          p {
+            margin: 4px 0;
+          }
+
+          mat-list-item {
+            margin-bottom: 5px;
+
+            &:hover {
+              background-color: $military-green-accent;
+              border-radius: 4px;
+            }
+          }
+
+          ul {
+            padding-left: 20px;
+            li {
+              margin-bottom: 3px;
+            }
+          }
+
+          mat-chip-set {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+
+            mat-chip {
+              background-color: $military-green-accent;
+              color: $military-text;
+              border: 1px solid $military-border;
+              font-weight: bold;
+            }
+          }
+        }
+
+        mat-accordion {
+          mat-expansion-panel {
+            background-color: $military-green-light;
+            color: $military-text;
+
+            mat-expansion-panel-header {
+              mat-panel-title {
+                color: $military-text;
+                font-weight: bold;
+              }
+
+              mat-panel-description {
+                color: $military-text-muted;
+                font-size: 0.9rem;
+              }
+            }
+
+            p, ul li {
+              color: $military-text;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+mat-grid-tile mat-card {
+  height: 90%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  margin: 10px;
+}
+
+mat-card-content {
+  flex: 1;
+  overflow: auto;
+}
