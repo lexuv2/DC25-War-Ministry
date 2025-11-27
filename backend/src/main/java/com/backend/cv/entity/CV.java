@@ -28,6 +28,9 @@ public class CV implements Serializable {
     @Schema(description = "Full name of the person", example = "John Doe")
     private String fullName;
 
+    @Schema(description = "Position the candidate applies for", example = "operator wajchy")
+    private String position;
+
     @Schema(description = "Date of birth", example = "1990-05-14")
     private LocalDate dateOfBirth;
 
