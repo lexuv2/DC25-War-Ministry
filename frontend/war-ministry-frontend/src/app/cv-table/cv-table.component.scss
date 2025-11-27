@@ -74,16 +74,17 @@ button[mat-flat-button] {
   font-size: 14px;
   border-radius: 20px;
   transition: background 0.3s, transform 0.2s;
+  margin: 10px;
 
   &:hover {
     transform: scale(1.05);
   }
 }
 
-// Change button color when the table row is hovered
 .mdc-data-table__row:hover button[mat-button],
 .mdc-data-table__row:hover button[mat-raised-button],
 .mdc-data-table__row:hover button[matButton],
 .mdc-data-table__row:hover button[mat-flat-button] {
   background: darken($military-green-accent, 10%) !important;
 }
+
