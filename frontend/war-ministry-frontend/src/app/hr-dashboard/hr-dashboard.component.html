@@ -1,27 +1,37 @@
 <div class="grid-container">
   <h1 class="mat-h1">Dzień dobry!</h1>
-  <mat-grid-list cols="2" rowHeight="350px">
-    @for (card of cards | async; track card) {
+  <mat-grid-list cols="3" rowHeight="350px">
+    @for (card of cards | async; track card; let i = $index) {
       <mat-grid-tile [colspan]="card.cols" [rowspan]="card.rows">
         <mat-card class="dashboard-card">
           <mat-card-header>
             <mat-card-title>
               {{card.title}}
-              <button mat-icon-button class="more-button" [matMenuTriggerFor]="menu" aria-label="Toggle menu">
-                <mat-icon>more_vert</mat-icon>
-              </button>
-              <mat-menu #menu="matMenu" xPosition="before">
-                <button mat-menu-item>Expand</button>
-                <button mat-menu-item>Remove</button>
-              </mat-menu>
             </mat-card-title>
           </mat-card-header>
-          <mat-card-content class="dashboard-card-content">
-            <div>Sekcja w budowie</div>
-          </mat-card-content>
-          <img mat-card-image src="./assets/bob.jpg">
+          <mat-card-content [class.special-content]="i === 1">
+          <ng-container *ngTemplateOutlet="card.template"></ng-container>
+        </mat-card-content>
         </mat-card>
       </mat-grid-tile>
     }
   </mat-grid-list>
 </div>
+
+<ng-template #card1>
+  <p>Najlepsze ministerstwo!</p>
+  <p>Zero udokumentowanych przekroczeń uprawnień!</p>
+  <p>Wcale nie musisz wstydziś się przed rodziną, że tu pracujesz!</p>
+</ng-template>
+
+<ng-template #card3>
+</ng-template>
+
+<ng-template #card4>
+    <p>
+Przyjmowanie zażaleń:<br/>
+EA237<br/>
+Budynek A Wydziału Elektroniki, Telekomunikacji i Informatyki<br/>
+ul. Siedlicka 5a<br/>
+80-233 Gdańsk<br/></p>
+</ng-template>

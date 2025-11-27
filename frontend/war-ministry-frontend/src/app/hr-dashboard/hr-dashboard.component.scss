@@ -19,3 +19,83 @@
 .dashboard-card-content {
   text-align: center;
 }
+
+
+
+$military-green: #1b2a1f;
+$military-green-light: #263a2c;
+$military-green-accent: #3b593d;
+$military-border: #4a5e4c;
+$military-text: #d7dfd7;
+$military-text-muted: #9aaa9a;
+
+.grid-container {
+  padding: 20px;
+
+  h1.mat-h1 {
+    color: $military-text;
+    margin-bottom: 20px;
+  }
+}
+
+mat-grid-list {
+  mat-grid-tile {
+    padding: 8px;
+
+    mat-card.dashboard-card {
+      background-color: $military-green-light;
+      color: $military-text;
+      border: 1px solid $military-border;
+      border-radius: 8px;
+      display: flex;
+      flex-direction: column;
+      font-size: 2rem;
+
+      mat-card-header {
+        border-bottom: 1px solid $military-border;
+        padding-bottom: 8px;
+
+        mat-card-title {
+          font-weight: bold;
+          color: $military-text;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+
+          .more-button {
+            color: $military-text-muted;
+
+            &:hover {
+              color: $military-text;
+            }
+          }
+        }
+      }
+
+      mat-card-content {
+        flex: 1;
+        font-size: 1.2rem;
+        color: $military-text;
+      }
+
+      img[mat-card-image] {
+        margin-top: 8px;
+        border-radius: 4px;
+        max-height: 200px;
+        object-fit: cover;
+        border: 1px solid $military-border;
+        flex-wrap: wrap;
+
+      }
+    }
+  }
+}
+
+
+
+.special-content {
+  background-image: url('/assets/sila.webp');
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
+}
